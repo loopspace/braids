@@ -1,5 +1,223 @@
-\ProvidesPackage{braids}
+% \iffalse meta-comment
+%<*internal>
+\iffalse
+%</internal>
+%<*readme>
+----------------------------------------------------------------
+braids --- a style file for drawing braid diagrams with TikZ/PGF
+E-mail: stacey@math.ntnu.no
+Released under the LaTeX Project Public License v1.3c or later
+See http://www.latex-project.org/lppl.txt
+----------------------------------------------------------------
 
+This package defines some commands for drawing braid diagrams with TikZ/PGF.
+%</readme>
+%<*internal>
+\fi
+\def\nameofplainTeX{plain}
+\ifx\fmtname\nameofplainTeX\else
+  \expandafter\begingroup
+\fi
+%</internal>
+%<*install>
+\input docstrip.tex
+\keepsilent
+\askforoverwritefalse
+\preamble
+----------------------------------------------------------------
+braids --- a style file for drawing braid diagrams with TikZ/PGF
+E-mail: stacey@math.ntnu.no
+Released under the LaTeX Project Public License v1.3c or later
+See http://www.latex-project.org/lppl.txt
+----------------------------------------------------------------
+
+\endpreamble
+\postamble
+
+Copyright (C) 2011 by Andrew Stacey <stacey@math.ntnu.no>
+
+This work may be distributed and/or modified under the
+conditions of the LaTeX Project Public License (LPPL), either
+version 1.3c of this license or (at your option) any later
+version.  The latest version of this license is in the file:
+
+http://www.latex-project.org/lppl.txt
+
+This work is "maintained" (as per LPPL maintenance status) by
+Andrew Stacey.
+
+This work consists of the file  braids.dtx
+and the derived files           braids.ins,
+                                braids.pdf, and
+                                braids.sty.
+
+\endpostamble
+\usedir{tex/latex/braids}
+\generate{
+  \file{\jobname.sty}{\from{\jobname.dtx}{package}}
+}
+%</install>
+%<install>\endbatchfile
+%<*internal>
+\usedir{source/latex/braids}
+\generate{
+  \file{\jobname.ins}{\from{\jobname.dtx}{install}}
+}
+\nopreamble\nopostamble
+\usedir{doc/latex/demopkg}
+\generate{
+  \file{README.txt}{\from{\jobname.dtx}{readme}}
+}
+\ifx\fmtname\nameofplainTeX
+  \expandafter\endbatchfile
+\else
+  \expandafter\endgroup
+\fi
+%</internal>
+%<*package>
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{braids}[2011/05/07 v1.0 Tikz/PGF commands for drawing braid diagrams]
+%</package>
+%<*driver>
+\documentclass{ltxdoc}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+%\usepackage{morefloats}
+\usepackage{tikz}
+\usepackage{\jobname}
+\usepackage[numbered]{hypdoc}
+\definecolor{lstbgcolor}{rgb}{0.9,0.9,0.9} 
+ 
+\usepackage{listings}
+\lstloadlanguages{[LaTeX]TeX}
+\lstset{breakatwhitespace=true,breaklines=true,language=TeX}
+ 
+\usepackage{fancyvrb}
+
+\newenvironment{example}
+  {\VerbatimEnvironment
+   \begin{VerbatimOut}[gobble=2]{example.out}}
+  {\end{VerbatimOut}
+   \begin{center}
+%   \setlength{\parindent}{0pt}
+   \fbox{\begin{minipage}{.9\linewidth}
+     \lstset{breakatwhitespace=true,breaklines=true,language=TeX,basicstyle=\small}
+     \lstinputlisting[]{example.out}
+   \end{minipage}}
+
+   \fbox{\begin{minipage}{.9\linewidth}
+     \input{example.out}
+   \end{minipage}}
+\end{center}
+}
+\EnableCrossrefs
+\CodelineIndex
+\RecordChanges
+\begin{document}
+  \DocInput{\jobname.dtx}
+\end{document}
+%</driver>
+% \fi
+%
+%
+% \CharacterTable
+%  {Upper-case    \A\B\C\D\E\F\G\H\I\J\K\L\M\N\O\P\Q\R\S\T\U\V\W\X\Y\Z
+%   Lower-case    \a\b\c\d\e\f\g\h\i\j\k\l\m\n\o\p\q\r\s\t\u\v\w\x\y\z
+%   Digits        \0\1\2\3\4\5\6\7\8\9
+%   Exclamation   \!     Double quote  \"     Hash (number) \#
+%   Dollar        \$     Percent       \%     Ampersand     \&
+%   Acute accent  \'     Left paren    \(     Right paren   \)
+%   Asterisk      \*     Plus          \+     Comma         \,
+%   Minus         \-     Point         \.     Solidus       \/
+%   Colon         \:     Semicolon     \;     Less than     \<
+%   Equals        \=     Greater than  \>     Question mark \?
+%   Commercial at \@     Left bracket  \[     Backslash     \\
+%   Right bracket \]     Circumflex    \^     Underscore    \_
+%   Grave accent  \`     Left brace    \{     Vertical bar  \|
+%   Right brace   \}     Tilde         \~}
+%
+%
+% \changes{1.0}{2011/05/03}{Converted to DTX file}
+%
+% \DoNotIndex{\newcommand,\newenvironment}
+%
+% \providecommand*{\url}{\texttt}
+% \GetFileInfo{brqids.dtx}
+% \title{The \textsf{braids} package}
+% \author{Andrew Stacey \\ \url{stacey@math.ntnu.no}}
+% \date{\fileversion~from \filedate}
+% 
+% \maketitle
+% 
+% \begin{center}
+% \begin{tikzpicture}
+% \braid[line width=3pt,line cap=round,style strand={1}{blue},number of strands=7] s_1 s_2 s_5^{-1};
+% \end{tikzpicture}
+% \end{center}
+% 
+% \section{Introduction}
+% 
+% This is a package for drawing braid diagrams using PGF/TikZ.
+% An example follows.
+% 
+% %\begin{example}
+% \begin{center}
+% \begin{tikzpicture}[rotate=90]
+% \braid[style strand={1}{red},style strand={2}{blue},style strand={3}{green}] s_1 s_2^{-1} s_1 s_2^{-1} s_1 s_2^{-1};
+% \end{tikzpicture}
+% \end{center}
+% %\end{example}
+% 
+% \section{Usage}
+% 
+% \DescribeMacro{\braid}
+% A braid is specified by the command \Verb+\braid+.
+% The syntax for this command is as follows:
+% 
+% \Verb+\braid[style options] braid word;+
+% 
+% The \Verb+braid word+ is an expression in the braid group, such as \Verb+s_1 s_2^{-1}+.
+% The generator labels are not significant.
+% The exponent can be \Verb+1+, \Verb+{-1}+, or missing (in which case it defaults to \Verb+1+).
+% 
+% The \Verb+style options+ set the style for the braid strands.
+% They can be grouped into three types: options that set up the main parameters for the braid, options that set the default style for the strands, and options that set up styles for individual strands.
+% The options are as follows.
+% 
+% \subsection{Global Options}
+% 
+% \DescribeMacro{number of strands} The key \Verb+number of strands+ sets the minimum number of strands for the braid.
+% The number of strands will grow according to the terms in the braid word so this merely sets a lower bound.
+% If not set, the number of strands will be determined by the terms in the braid word.
+% 
+% \DescribeMacro{height}
+% The key \Verb+height+ sets the height of the piece of the braid corresponding to an element in the group.
+% 
+% \DescribeMacro{width}
+% The key \Verb+width+ sets the separation of the strands in the braid.
+% 
+% \DescribeMacro{border height}
+% The key \Verb+border height+ adds a little extra length to the strands at the start and end of the braid.
+% 
+% \DescribeMacro{style strand}
+% The style of the strands are controlled by two types of option.
+% Style options that are set on the \Verb+\braid+ command are passed to every strand.
+% It is also possible to add style options to individual strands using the key \Verb+style strand+.
+% This takes two options, a strand number and a list of options to be applied to that strand.
+% Thus, the syntax is \Verb+style strand={n}{options}+.
+% The strands are numbered by their starting position.
+% Not all of the standard TikZ style options are possible due to the way that the strands are constructed.
+% Basically, the options that are allowed are those that do not require changing the path or drawing it more than once.
+% 
+% \StopEventually{}
+%
+% \section{Implementation}
+%
+% \iffalse
+%<*package>
+% \fi
+%
+%    \begin{macrocode}
 \def\braid{%
   \begingroup
   \braid@start}
@@ -208,11 +426,16 @@
     number of strands/.initial=0,
     height/.initial=1cm,
     width/.initial=1cm,
-    colour/.initial=black,
     border height/.initial=.25cm,
     style strand/.code 2 args={%
       \expandafter\def\csname braid@options@strand@#1\endcsname{#2}
     }
 }
+%    \end{macrocode}
+% \iffalse
+%</package>
+% \fi
+%
+% \Finale
 
 \endinput
