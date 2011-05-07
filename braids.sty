@@ -1,0 +1,218 @@
+\ProvidesPackage{braids}
+
+\def\braid{%
+  \begingroup
+  \braid@start}
+
+\def\braid@process{%
+  \@ifnextchar;{\braid@render}{\braid@@process}}
+
+\def\braid@@process{%
+  \@ifnextchar^{\braid@sup}{\@ifnextchar_{\braid@sub}{\braid@addto@label}}}
+
+\def\braid@sup^#1_#2{\g@addto@macro\braid@label{_{#2}^{#1}}\braid@add@crossing{#2}{#1}}
+
+\def\braid@sub_#1{\@ifnextchar^{\braid@@sub{#1}}{\g@addto@macro\braid@label{_{#1}}\braid@add@crossing{#1}{1}}}
+
+\def\braid@@sub#1^#2{\g@addto@macro\braid@label{_{#1}^{#2}}\braid@add@crossing{#1}{#2}}
+
+\def\braid@ne{1}
+
+% The strands and paths are getting tangled
+
+\def\braid@add@crossing#1#2{%
+  \edef\braid@crossing@type{#2}
+  \edef\braid@this@strand{#1}
+  \pgfmathtruncatemacro{\braid@next@strand}{#1+1}
+% Coordinates of crossing
+  \braid@tx=\braid@this@strand\braid@width
+  \braid@ty=\value{braid@level}\braid@height
+  \advance\braid@ty by \braid@eh
+  \braid@nx=\braid@tx
+  \braid@ny=\braid@ty
+  \advance\braid@nx by \braid@width
+  \advance\braid@ny by \braid@height
+  \braid@cy=\braid@ty
+  \braid@dy=\braid@ny
+  \advance\braid@cy by .5\braid@height
+  \advance\braid@dy by -.5\braid@height
+
+% Try to find a starting point for the strand ending here
+  \expandafter\let\expandafter\braid@this@path@origin\csname braid@strand@\braid@this@strand @origin\endcsname
+
+\ifx\braid@this@path@origin\relax
+  % Haven't seen this strand before, so initialise it
+  % Record the initial position of the strand
+  \let\braid@this@path@origin\braid@this@strand
+  % start a new soft path
+  \pgfsyssoftpath@setcurrentpath{\@empty}
+  \pgfpathmoveto{\pgfpoint{\braid@tx}{0pt}}
+  % save the path
+  \pgfsyssoftpath@getcurrentpath{\braid@this@path}
+  \else
+  \expandafter\let\expandafter\braid@this@path\csname braid@strand@\braid@this@path@origin\endcsname
+  \fi
+
+% Try to find a starting point for the next strand ending here
+  \expandafter\let\expandafter\braid@next@path@origin\csname braid@strand@\braid@next@strand @origin\endcsname
+
+  \ifx\braid@next@path@origin\relax
+  % Haven't seen this strand before, so initialise it
+  % Record the initial position of the strand
+  \let\braid@next@path@origin\braid@next@strand
+  % start a new soft path
+  \pgfsyssoftpath@setcurrentpath{\@empty}
+  \pgfpathmoveto{\pgfpoint{\braid@nx}{0pt}}
+  % save the path
+  \pgfsyssoftpath@getcurrentpath{\braid@next@path}
+  \else
+  \expandafter\let\expandafter\braid@next@path\csname braid@strand@\braid@next@path@origin\endcsname
+  \fi
+
+  % Start with the first path
+  \pgfsyssoftpath@setcurrentpath{\braid@this@path}
+  % Draw a line down to the current level
+  \pgfpathlineto{\pgfqpoint{\braid@tx}{\braid@ty}}
+  % Curve across to the next position
+\ifx\braid@crossing@type\braid@over@cross
+\pgfpathcurveto{\pgfqpoint{\braid@tx}{\braid@cy}}{\pgfqpoint{\braid@nx}{\braid@dy}}{\pgfqpoint{\braid@nx}{\braid@ny}}
+\else
+\pgfpathcurvebetweentimecontinue{0}{.4}{\pgfqpoint{\braid@tx}{\braid@ty}}{\pgfqpoint{\braid@tx}{\braid@cy}}{\pgfqpoint{\braid@nx}{\braid@dy}}{\pgfqpoint{\braid@nx}{\braid@ny}}
+\pgfpathcurvebetweentime{.6}{1}{\pgfqpoint{\braid@tx}{\braid@ty}}{\pgfqpoint{\braid@tx}{\braid@cy}}{\pgfqpoint{\braid@nx}{\braid@dy}}{\pgfqpoint{\braid@nx}{\braid@ny}}
+\fi
+    % Save the path
+  \pgfsyssoftpath@getcurrentpath{\braid@this@path}
+
+  % Now do the same with the second path
+  \pgfsyssoftpath@setcurrentpath{\braid@next@path}
+  % Draw a line down to the current level
+  \pgfpathlineto{\pgfqpoint{\braid@nx}{\braid@ty}}
+  % Curve across to the previous position
+\ifx\braid@crossing@type\braid@over@cross
+\pgfpathcurvebetweentimecontinue{0}{.4}{\pgfqpoint{\braid@nx}{\braid@ty}}{\pgfqpoint{\braid@nx}{\braid@cy}}{\pgfqpoint{\braid@tx}{\braid@dy}}{\pgfqpoint{\braid@tx}{\braid@ny}}
+\pgfpathcurvebetweentime{.6}{1}{\pgfqpoint{\braid@nx}{\braid@ty}}{\pgfqpoint{\braid@nx}{\braid@cy}}{\pgfqpoint{\braid@tx}{\braid@dy}}{\pgfqpoint{\braid@tx}{\braid@ny}}
+\else
+  \pgfpathcurveto{\pgfqpoint{\braid@nx}{\braid@cy}}{\pgfqpoint{\braid@tx}{\braid@dy}}{\pgfqpoint{\braid@tx}{\braid@ny}}
+\fi
+  % Save the path
+  \pgfsyssoftpath@getcurrentpath{\braid@next@path}
+
+% Now save the paths again
+  \expandafter\let\csname braid@strand@\braid@this@path@origin \endcsname\braid@this@path
+  \expandafter\let\csname braid@strand@\braid@next@path@origin \endcsname\braid@next@path
+
+  % Now update the origins
+  \expandafter\let\csname braid@strand@\braid@this@strand @origin\endcsname\braid@next@path@origin
+  \expandafter\let\csname braid@strand@\braid@next@strand @origin\endcsname\braid@this@path@origin
+
+% increment the counter
+  \stepcounter{braid@level}
+
+% increment the strand counter, if necessary
+  \pgfmathparse{\value{braid@strands} < \braid@next@strand ? "\noexpand\setcounter{braid@strands}{\braid@next@strand}" : ""}
+  \pgfmathresult
+  \braid@process
+}
+
+\def\braid@addto@label#1{%
+  \g@addto@macro\braid@label{#1}%
+  \braid@process}
+
+\def\braid@render{
+  \foreach \braid@k in {1,...,\value{braid@strands}} {
+% Start a local scope to ensure we don't mess with other braids
+    \pgfsys@beginscope
+% Default is to draw each braid
+    \tikz@mode@drawtrue%
+    \let\tikz@mode=\pgfutil@empty
+    \let\tikz@options=\pgfutil@empty
+% (x,y) coordinates of bottom of strand
+    \braid@tx=\braid@k\braid@width
+    \braid@ty=\value{braid@level}\braid@height
+    \advance\braid@ty by 2\braid@eh
+% Try to find the starting point of this strand
+    \expandafter\let\expandafter\braid@path@origin\csname braid@strand@\braid@k @origin\endcsname
+    \ifx\braid@path@origin\relax
+% If that doesn't exist, we'll just draw a straight line
+% so we move to the top of the current position
+    \pgfsyssoftpath@setcurrentpath{\@empty}
+    \pgfpathmoveto{\pgfqpoint{\braid@tx}{0pt}}
+    \let\braid@path@origin\braid@k
+    \else
+% If the path does exist, we load it
+    \expandafter\let\expandafter\braid@path\csname braid@strand@\braid@path@origin\endcsname
+    \pgfsyssoftpath@setcurrentpath{\braid@path}
+    \fi
+% Extend the path to the bottom
+    \pgflineto{\pgfqpoint{\braid@tx}{\braid@ty}}
+% Load common style options
+    \expandafter\tikzset\expandafter{\braid@style}
+% Load any style options specific to this strand
+    \expandafter\let\expandafter\braid@style\csname braid@options@strand@\braid@path@origin\endcsname
+    \ifx\braid@style\relax
+    \else
+    \expandafter\tikzset\expandafter{\braid@style}
+    \fi
+\braid@options
+    \tikz@mode
+    \tikz@options
+      \edef\tikz@temp{\noexpand\pgfusepath{%
+          \iftikz@mode@draw draw\fi%
+      }}%
+      \tikz@temp
+% Close the scope
+   \pgfsys@endscope
+  }
+
+  \endgroup}
+
+\def\braid@start{%
+  \@ifnextchar[{\braid@start@opt}{\braid@start@noopt}%
+}
+
+\def\braid@start@opt[#1]{%
+  \pgfkeys{/pgf/braid/.cd,#1}\braid@start@noopt}
+
+\def\braid@start@noopt{%
+    \let\braid@options\tikz@options
+  \setcounter{braid@strands}{\pgfkeysvalueof{/pgf/braid/number of strands}}%
+    \setcounter{braid@level}{0}%
+    \let\braid@label\@empty
+    \braid@width=\pgfkeysvalueof{/pgf/braid/width}
+    \braid@height=\pgfkeysvalueof{/pgf/braid/height}
+    \braid@eh=\pgfkeysvalueof{/pgf/braid/border height}
+    \braid@height=-\braid@height
+    \braid@eh=-\braid@eh
+    \braid@process
+}
+
+\newdimen\braid@width
+\newdimen\braid@height
+\newdimen\braid@tx
+\newdimen\braid@ty
+\newdimen\braid@nx
+\newdimen\braid@ny
+\newdimen\braid@cy
+\newdimen\braid@dy
+\newdimen\braid@eh
+
+\let\braid@style\pgfutil@empty
+\def\braid@over@cross{1}
+
+\newcounter{braid@level}
+\newcounter{braid@strands}
+\pgfkeys{
+    /tikz/braid/.search also={/pgf},
+    /pgf/braid/.search also={/pgf,/tikz},
+    /pgf/braid/.cd,
+    number of strands/.initial=0,
+    height/.initial=1cm,
+    width/.initial=1cm,
+    colour/.initial=black,
+    border height/.initial=.25cm,
+    style strand/.code 2 args={%
+      \expandafter\def\csname braid@options@strand@#1\endcsname{#2}
+    }
+}
+
+\endinput
