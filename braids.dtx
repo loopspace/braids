@@ -226,7 +226,30 @@ and the derived files           braids.ins,
   \@ifnextchar;{\braid@render}{\braid@@process}}
 
 \def\braid@@process{%
-  \@ifnextchar^{\braid@sup}{\@ifnextchar_{\braid@sub}{\braid@addto@label}}}
+  \@ifnextchar^{\braid@sup}{%
+    \@ifnextchar_{\braid@sub}{%
+      \@ifnextchar-{\braid@minus}{%
+        \@ifnextchar[{\braid@process@options}{%
+            \@ifnextchar|{\braid@draw@floor}{%
+              \braid@addto@label
+            }%
+          }%]
+        }%
+      }%
+    }%
+  }
+
+\def\braid@draw@floor|{%
+    \edef\braid@tmp{,\expandafter\the\value{braid@level}}%
+      \expandafter\g@addto@macro\expandafter\braid@floors\expandafter{\braid@tmp}%
+    \braid@process
+}
+
+\def\braid@process@options[#1]{%
+    \tikzset{#1}%
+  \braid@process}
+
+\def\braid@minus-{\braid@increase@levelfalse\braid@process}
 
 \def\braid@sup^#1_#2{\g@addto@macro\braid@label{_{#2}^{#1}}\braid@add@crossing{#2}{#1}}
 
@@ -236,12 +259,18 @@ and the derived files           braids.ins,
 
 \def\braid@ne{1}
 
-% The strands and paths are getting tangled
-
 \def\braid@add@crossing#1#2{%
   \edef\braid@crossing@type{#2}
   \edef\braid@this@strand{#1}
   \pgfmathtruncatemacro{\braid@next@strand}{#1+1}
+
+% increment the counter, if requested
+  \ifbraid@increase@level
+  \stepcounter{braid@level}
+  \fi
+% request increment next time
+  \braid@increase@leveltrue
+
 % Coordinates of crossing
   \braid@tx=\braid@this@strand\braid@width
   \braid@ty=\value{braid@level}\braid@height
@@ -254,6 +283,8 @@ and the derived files           braids.ins,
   \braid@dy=\braid@ny
   \advance\braid@cy by .5\braid@height
   \advance\braid@dy by -.5\braid@height
+  \advance\braid@ty by .05\braid@height
+  \advance\braid@ny by -.05\braid@height
 
 % Try to find a starting point for the strand ending here
   \expandafter\let\expandafter\braid@this@path@origin\csname braid@strand@\braid@this@strand @origin\endcsname
@@ -323,9 +354,6 @@ and the derived files           braids.ins,
   \expandafter\let\csname braid@strand@\braid@this@strand @origin\endcsname\braid@next@path@origin
   \expandafter\let\csname braid@strand@\braid@next@strand @origin\endcsname\braid@this@path@origin
 
-% increment the counter
-  \stepcounter{braid@level}
-
 % increment the strand counter, if necessary
   \pgfmathparse{\value{braid@strands} < \braid@next@strand ? "\noexpand\setcounter{braid@strands}{\braid@next@strand}" : ""}
   \pgfmathresult
@@ -336,7 +364,50 @@ and the derived files           braids.ins,
   \g@addto@macro\braid@label{#1}%
   \braid@process}
 
+\def\braid@floors@trim,{}
+
+\def\braid@render@floor{%
+    \draw (\braidbx,\braidby) rectangle (\braidex,\braidey);
+}
+
 \def\braid@render{
+    \ifx\braid@floors\@empty
+    \else
+    \pgfsys@beginscope
+    \pgfsyssoftpath@setcurrentpath{\empty}
+    \edef\braid@floors{\expandafter\braid@floors@trim\braid@floors}
+    \braid@tx=\braid@width
+    \advance\braid@tx by \braid@eh
+    \braid@nx=\value{braid@strands}\braid@width
+    \advance\braid@nx by -\braid@eh
+    \foreach \braid@f in \braid@floors {
+      \pgfsys@beginscope
+      \braid@ty=\braid@f\braid@height
+      \advance\braid@ty by \braid@eh
+      \advance\braid@ty by \braid@height
+      \braid@ny=\braid@ty
+      \advance\braid@ny by \braid@height
+      \edef\braidsx{\the\braid@tx}
+      \edef\braidsy{\the\braid@ty}
+      \edef\braidex{\the\braid@nx}
+      \edef\braidey{\the\braid@ny}
+      \let\tikz@options=\pgfutil@empty
+% Load general floor style options
+    \expandafter\tikzset\expandafter{\braid@floors@style}
+% Load any style options specific to this floor
+      \pgfmathtruncatemacro{\braid@ff}{\braid@f+2}
+    \expandafter\let\expandafter\braid@floor@style\csname braid@options@floor@\braid@ff\endcsname
+    \ifx\braid@floor@style\relax
+    \else
+    \expandafter\tikzset\expandafter{\braid@floor@style}
+    \fi
+\tikz@options
+      \braid@render@floor
+\pgfsys@endscope
+    }
+    \pgfsys@endscope
+    \fi
+  \stepcounter{braid@level}
   \foreach \braid@k in {1,...,\value{braid@strands}} {
 % Start a local scope to ensure we don't mess with other braids
     \pgfsys@beginscope
@@ -394,13 +465,15 @@ and the derived files           braids.ins,
 \def\braid@start@noopt{%
     \let\braid@options\tikz@options
   \setcounter{braid@strands}{\pgfkeysvalueof{/pgf/braid/number of strands}}%
-    \setcounter{braid@level}{0}%
+    \setcounter{braid@level}{-1}%
     \let\braid@label\@empty
+      \let\braid@floors\@empty
     \braid@width=\pgfkeysvalueof{/pgf/braid/width}
     \braid@height=\pgfkeysvalueof{/pgf/braid/height}
     \braid@eh=\pgfkeysvalueof{/pgf/braid/border height}
     \braid@height=-\braid@height
     \braid@eh=-\braid@eh
+    \braid@increase@leveltrue
     \braid@process
 }
 
@@ -414,7 +487,10 @@ and the derived files           braids.ins,
 \newdimen\braid@dy
 \newdimen\braid@eh
 
+\newif\ifbraid@increase@level
+
 \let\braid@style\pgfutil@empty
+\let\braid@floors@style\pgfutil@empty
 \def\braid@over@cross{1}
 
 \newcounter{braid@level}
@@ -427,8 +503,17 @@ and the derived files           braids.ins,
     height/.initial=1cm,
     width/.initial=1cm,
     border height/.initial=.25cm,
+    floor command/.code={%
+      \def\braid@render@floor{#1}%
+    },
     style strand/.code 2 args={%
       \expandafter\def\csname braid@options@strand@#1\endcsname{#2}
+    },
+    style floor/.code 2 args={%
+      \expandafter\def\csname braid@options@floor@#1\endcsname{#2}
+    },
+    style floors/.code={%
+      \def\braid@floors@style{#1}
     }
 }
 %    \end{macrocode}

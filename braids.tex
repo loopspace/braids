@@ -1,0 +1,23 @@
+\documentclass{article}
+\usepackage{tikz}
+\usepackage{braids}
+
+\begin{document}
+\begin{tikzpicture}
+\braid[line width=2pt,style strand={1}{red},style strand={2}{blue},style strand={3}{green}] s_1 s_2^{-1} s_1 s_2^{-1} s_1 s_2^{-1};
+\end{tikzpicture}
+\begin{tikzpicture}
+\braid[
+  style floors={fill=yellow},
+  style floor={1}{dashed,fill=yellow!50!green},
+  floor command={%
+    \fill (\braidsx,\braidsy) rectangle (\braidex,\braidey);
+    \draw (\braidsx,\braidsy) -- (\braidex,\braidsy);
+  },
+  line width=2pt,
+  style strand={1}{red},
+  style strand={2}{blue},
+  style strand={3}{green}
+]| s_1-s_3-s_5 | s_2^{-1}-s_4| s_1-s_4 s_2^{-1} s_1-s_3 s_2^{-1}-s_4^{-1};
+\end{tikzpicture}
+\end{document}
