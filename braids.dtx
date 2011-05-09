@@ -174,17 +174,36 @@ and the derived files           braids.ins,
 % A braid is specified by the command \Verb+\braid+.
 % The syntax for this command is as follows:
 % 
-% \Verb+\braid[style options] braid word;+
+% \Verb+\braid[style options] (name) at (coordinate) braid-word;+
 % 
-% The \Verb+braid word+ is an expression in the braid group, such as \Verb+s_1 s_2^{-1}+.
+% The \Verb+braid-word+ is an expression in the braid group, such as \Verb+s_1 s_2^{-1}+.
 % The generator labels are not significant.
 % The exponent can be \Verb+1+, \Verb+{-1}+, or missing (in which case it defaults to \Verb+1+).
+% Certain other symbols are allowed in the \Verb+braid-word+ which control the rendering of the braid.
+% To get crossings to render at the same height, separate them with a hyphen (note: no check is made to ensure that the crossings can legally be put at the same height; \emph{caveat emptor}).
+% To draw a \emph{floor}, precede the braid element by a vertical line.
+% What happens then is that when the braid is rendered, the coordinates of the rectangle behind that crossing (wide enough to encompass all the strands) is passed to a command.
+% The intention is that this command draw something behind the braid.
+% The command is configurable by a key (see \ref{sec:styleopts}).
 % 
+% The (optional) \Verb+name+ acts a little like the \Verb+name+ of a TikZ node.
+% When it is specified, the routine that renders the braid also saves certain coordinates as if they were node anchors.
+% Specifically, \Verb+coordinate+ nodes are placed at the centre of the braid diagram and at the ends of each strand.
+% The centre has the label \Verb+name+, the strands are labelled \Verb+name-number-end+ and \Verb+name-rev-number-end+, where \Verb+name+ is the name given to the braid, \Verb+number+ is the number of the strand counting from the left, and \Verb+end+ is either \Verb+s+ for the start or \Verb+e+ for the end.
+% If the version with \Verb+rev+ is used then the numbers correspond to the \emph{final} positions of the braids.
+% The name can also be specified with the \Verb+name+ key.
+%
+% The (options) \Verb+at (coordinate)+ syntax positions the braid at the \Verb+coordinate+ in the current picture.
+% Due to the implementation, the coordinate has to be known at the start, but the width and height of the braid are only known at the end.
+% Therefore, the braid is positioned so that the start of the first strand is at \Verb+(coordinate)+.
+% This can also be specified using the \Verb+at+ key.
+%
 % The \Verb+style options+ set the style for the braid strands.
 % They can be grouped into three types: options that set up the main parameters for the braid, options that set the default style for the strands, and options that set up styles for individual strands.
 % The options are as follows.
 % 
-% \subsection{Global Options}
+% \subsection{Style Options}
+% \label{sec:styleopts}
 % 
 % \DescribeMacro{number of strands} The key \Verb+number of strands+ sets the minimum number of strands for the braid.
 % The number of strands will grow according to the terms in the braid word so this merely sets a lower bound.
@@ -209,6 +228,58 @@ and the derived files           braids.ins,
 % Not all of the standard TikZ style options are possible due to the way that the strands are constructed.
 % Basically, the options that are allowed are those that do not require changing the path or drawing it more than once.
 % 
+% \DescribeMacro{floor command}
+% When a floor is requested behind a crossing, the actual way to render it is determined by a command.
+% This key allows the user to define that command.
+% The argument to this key should be the code that should be executed for each floor.
+% To avoid the hassle of getting the number of hashes right, the command should take no arguments.
+% Rather, the coordinates of the rectangle are saved in to macros \Verb+\floorsx+, \Verb+\floorsy+, \Verb+\floorex+, \Verb+\floorey+ (these macros will expand to something like \Verb+10pt+) and the command should use these to position the drawing.
+% The default is to draw a line at the top and at the bottom of the rectangle.
+%
+% \DescribeMacro{style floors}
+% \DescribeMacro{style floor}
+% In the spirit of separating \emph{style} and \emph{content}, the style options for the floors can be specified separately to the command (of course, they could be built in to the command).
+% One advantage of this over building them in to the command is to allow them to be overridden for individual floors.
+% The \Verb+style floors+ sets up options to be used for \emph{all} floors, whilst the \Verb+style floor={n}{options}+ sets up options to be used only for the \(n\)th floor.
+% Anything specified in the \Verb+floor command+ will take precedence over both of these.
+%
+% Any other style options are passed to the underlying TikZ/PGF system and so may influence how the braid is drawn (but note that not all keys make sense due to the implementation).
+%
+%
+% \section{Example}
+%
+% Here is a more detailed example.
+% (Note that the floors are not drawn in the below.
+% I have no idea why that is as they work when this example is put in a standalone file.
+% It is presumably something to do with the documentation packages.)
+%
+%
+% \begin{example}
+% \begin{center}
+% \begin{tikzpicture}
+% \braid[
+%   style floors={fill=yellow},
+%   style floor={1}{dashed,fill=yellow!50!green},
+%   floor command={%
+%   \message{drawing floor}
+%    \fill (\floorsx,\floorsy) rectangle (\floorex,\floorey);
+%    \draw (\floorsx,\floorsy) -- (\floorex,\floorsy);
+%   },
+%   line width=2pt,
+%   style strand={1}{red},
+%   style strand={2}{blue},
+%   style strand={3}{green}
+% ] (braid) at (2,0) | s_1-s_3-s_5 | s_2^{-1}-s_4| s_1-s_4 s_2^{-1} s_1-s_3 s_2^{-1}-s_4^{-1};
+% \fill[yellow] (2,0) circle (4pt);
+% \fill[purple] (braid) circle (4pt);
+% \node[at=(braid-3-s),pin=north west:strand 3] {};
+% \node[at=(braid-3-e),pin=south west:strand 3] {};
+% \node[at=(braid-rev-3-s),pin=north east:strand 3 (from bottom)] {};
+% \node[at=(braid-rev-3-e),pin=south east:strand 3 (from bottom)] {};
+% \end{tikzpicture}
+% \end{center}
+% \end{example}
+%
 % \StopEventually{}
 %
 % \section{Implementation}
@@ -217,48 +288,256 @@ and the derived files           braids.ins,
 %<*package>
 % \fi
 %
+% \begin{macro}{\ge@addto@macro}
+% This is an expanded version of \Verb+\g@addto@macro+.
+% Namely, it adds the \emph{expansion} of the second argument to the first.
 %    \begin{macrocode}
-\def\braid{%
+\long\def\ge@addto@macro#1#2{%
   \begingroup
-  \braid@start}
-
+  \toks@\expandafter\expandafter\expandafter{\expandafter#1#2}%
+  \xdef#1{\the\toks@}%
+  \endgroup}
+%    \end{macrocode}
+% \end{macro}
+% \begin{macro}{\braid}
+% This is the user command.
+% We start a group to ensure that all our assignments are local, and then call our initialisation code
+%    \begin{macrocode}
+\newcommand{\braid}[1][]{%
+  \begingroup
+  \braid@start{#1}}
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{\braid@process}
+% This is the token swallower.
+% This takes the next token on the braid specification and passes it to the handler command which decides what to do next.
+%    \begin{macrocode}
 \def\braid@process{%
-  \@ifnextchar;{\braid@render}{\braid@@process}}
-
-\def\braid@@process{%
-  \@ifnextchar^{\braid@sup}{%
-    \@ifnextchar_{\braid@sub}{%
-      \@ifnextchar-{\braid@minus}{%
-        \@ifnextchar[{\braid@process@options}{%
-            \@ifnextchar|{\braid@draw@floor}{%
-              \braid@addto@label
-            }%
-          }%]
-        }%
-      }%
-    }%
-  }
-
-\def\braid@draw@floor|{%
-    \edef\braid@tmp{,\expandafter\the\value{braid@level}}%
-      \expandafter\g@addto@macro\expandafter\braid@floors\expandafter{\braid@tmp}%
-    \braid@process
+  \afterassignment\braid@handle\let\braid@token=%
 }
-
-\def\braid@process@options[#1]{%
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{\braid@process@start}
+% This is a variant of \Verb+\braid@process+ which is used at the start where we might have a few extra bits and pieces before the braid itself starts.
+%    \begin{macrocode}
+\def\braid@process@start{%
+  \afterassignment\braid@handle@start\let\braid@token=%
+}
+%    \end{macrocode}
+% \end{macro}
+% \begin{macro}{\braid@handle@start}
+% This is the handler in use at the start.
+% It looks for the tokens \Verb+a+ or \Verb+(+ which (might) signal the start of an \Verb+at (coordinate)+ or \Verb+(name)+.
+% If we get anything else (modulo spaces) we decide that we've reached the end of the initialisation stuff and it is time to get started on the braid itself.
+%    \begin{macrocode}
+\def\braid@handle@start{%
+  \let\braid@next=\braid@handle
+  \ifx\braid@token a
+   \let\braid@next=\braid@maybe@locate
+  \else
+  \ifx\braid@token(%)
+   \iffalse)\fi %Indentation hack!
+   \let\braid@next=\braid@assign@name
+  \else
+  \ifx\braid@token\@sptoken
+   \let\braid@next=\braid@process@start
+  \fi
+  \fi
+  \fi
+  \braid@next%
+}
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{\braid@handle}
+% This is the main handler for parsing the braid word.
+% It decides what action to take depending on what the token is.
+%    \begin{macrocode}
+\def\braid@handle{%
+  \let\braid@next=\braid@process
+  \ifx\braid@token;
+   \let\braid@next=\braid@render
+  \else
+  \ifx\braid@token^
+   \let\braid@next=\braid@sup
+  \else
+  \ifx\braid@token_
+   \let\braid@next=\braid@sub
+  \else
+  \ifx\braid@token-
+   \braid@increase@levelfalse
+  \else
+  \ifx\braid@token[
+   \let\braid@next=\braid@process@options
+  \else
+  \ifx\braid@token|
+   \edef\braid@tmp{,\expandafter\the\value{braid@level}}%
+   \ge@addto@macro\braid@floors\braid@tmp%
+  \else
+  \ifx\braid@token\bgroup
+   \braid@beginscope
+  \else
+  \ifx\braid@token\egroup
+   \braid@endscope
+  \else
+  \ge@addto@macro\braid@label{\braid@token}%
+  \fi
+  \fi
+  \fi
+  \fi
+  \fi
+  \fi
+  \fi
+  \fi
+  \braid@next%
+}
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{\braid@maybe@locate}
+% If we got an \Verb+a+ token in the \Verb+\braid@handle@start+ then it \emph{might} mean we're looking at \Verb+at (coordinate)+ or it might mean that the user has decided to use \Verb+a+ as the braid parameter.
+% So we examine the next token for a \Verb+t+. 
+%    \begin{macrocode}
+\def\braid@maybe@locate{%
+  \afterassignment\braid@@maybe@locate\let\braid@token=%
+}
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{\braid@@maybe@locate}
+% This is where we test for \Verb+t+ and act appropriately.
+%    \begin{macrocode}
+\def\braid@@maybe@locate{%
+  \let\braid@next=\braid@handle
+  \ifx\braid@token t
+   \let\braid@next=\braid@find@location
+  \fi
+  \braid@next%
+}
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{\braid@find@location}
+% This macro starts us looking for a coordinate.
+%    \begin{macrocode}
+\def\braid@find@location{%
+  \afterassignment\braid@@find@location\let\braid@token=%
+}
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{\braid@@find@location}
+% This is the test for the start of a coordinate.
+% If we get a \Verb+(+ that means we've reached the coordinate.
+% A space means ``carry on''.
+% Anything else is a (non-fatal) error.
+%    \begin{macrocode}
+\def\braid@@find@location{%
+  \let\braid@next=\braid@location@error
+  \ifx\braid@token(%)
+   \let\braid@next=\braid@locate
+  \else
+  \ifx\braid@token\@sptoken
+   \let\braid@next=\braid@find@location
+  \fi
+  \fi
+  \braid@next%
+}
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{\braid@location@error}
+% This is our error message for not getting an error
+%    \begin{macrocode}
+\def\braid@location@error{%
+  \errmessage{Could not figure out location for braid}%
+  \braid@process@start%
+}
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{\braid@locate}
+% If we reached a \Verb+(+ when looking for a coordinate, everything up to the next \Verb+)+ is that coordinate.
+%    \begin{macrocode}
+\def\braid@locate#1){%
+  \braid@relocate{(#1)}%
+}
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{\braid@relocate}
+% This is the macro that actually does the relocation.
+%    \begin{macrocode}
+\def\braid@relocate#1{%
+  \path #1;
+  \pgfgetlastxy{\braid@loc@x}{\braid@loc@y}
+  \braid@tx=0pt
+  \braid@ty=0pt
+  \advance\braid@tx by \braid@loc@x
+  \advance\braid@ty by \braid@loc@y
+  \advance\braid@tx by -\braid@width
+  \pgftransformshift{\pgfqpoint{\braid@tx}{\braid@ty}}
+  \braid@process@start%
+}
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{\braid@assign@name}
+% This macro saves our name.
+%    \begin{macrocode}
+\def\braid@assign@name#1){%
+  \def\braid@name{#1}%
+  \braid@process@start%
+}
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{\braid@process@options}
+% The intention of this macro is to allow setting of style options mid-braid.
+% (At present, this wouldn't make a lot of sense.)
+%    \begin{macrocode}
+\def\braid@process@options#1]{%
     \tikzset{#1}%
-  \braid@process}
-
-\def\braid@minus-{\braid@increase@levelfalse\braid@process}
-
-\def\braid@sup^#1_#2{\g@addto@macro\braid@label{_{#2}^{#1}}\braid@add@crossing{#2}{#1}}
-
-\def\braid@sub_#1{\@ifnextchar^{\braid@@sub{#1}}{\g@addto@macro\braid@label{_{#1}}\braid@add@crossing{#1}{1}}}
-
+  \braid@process%
+}
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{\braid@sup}
+% This handles braid elements of the form \Verb+a^{-1}_2+.
+%    \begin{macrocode}
+\def\braid@sup#1_#2{\g@addto@macro\braid@label{_{#2}^{#1}}\braid@add@crossing{#2}{#1}}
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{\braid@sub}
+%    \begin{macrocode}
+% This handles braid elements of the form \Verb+a_1+ or \Verb+a_1^{-1}+.
+\def\braid@sub#1{\@ifnextchar^{\braid@@sub{#1}}{\g@addto@macro\braid@label{_{#1}}\braid@add@crossing{#1}{1}}}
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{\braid@@sub}
+% Helper macro for \Verb+\braid@sub+.
+%    \begin{macrocode}
 \def\braid@@sub#1^#2{\g@addto@macro\braid@label{_{#1}^{#2}}\braid@add@crossing{#1}{#2}}
-
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{\braid@ne}
+% Remember what \Verb+1+ looks like for testing against.
+%    \begin{macrocode}
 \def\braid@ne{1}
-
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{\braid@add@crossing}
+% This is the macro which add the crossing to the current list of strands.
+% The strands are stored as \emph{soft paths} (see the TikZ/PGF documentation).
+% So this selects the right strands and then extends them according to the crossing type.
+%    \begin{macrocode}
 \def\braid@add@crossing#1#2{%
   \edef\braid@crossing@type{#2}
   \edef\braid@this@strand{#1}
@@ -357,19 +636,31 @@ and the derived files           braids.ins,
 % increment the strand counter, if necessary
   \pgfmathparse{\value{braid@strands} < \braid@next@strand ? "\noexpand\setcounter{braid@strands}{\braid@next@strand}" : ""}
   \pgfmathresult
-  \braid@process
+  \braid@process%
 }
-
-\def\braid@addto@label#1{%
-  \g@addto@macro\braid@label{#1}%
-  \braid@process}
-
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{\braid@floors@trim}
+% The list of floors, if given, will start with a superfluous comma.
+% This removes it.
+%    \begin{macrocode}
 \def\braid@floors@trim,{}
-
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{\braid@render@floor}
+% This is the default render for floors: it draws a rectangle.
+%    \begin{macrocode}
 \def\braid@render@floor{%
-    \draw (\braidbx,\braidby) rectangle (\braidex,\braidey);
+    \draw (\floorsx,\floorsy) rectangle (\floorex,\floorey);
 }
-
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{\braid@render}
+% This is called at the end of the braid and it renders the braids and floors according to whatever has been built up up to now.
+%    \begin{macrocode}
 \def\braid@render{
     \ifx\braid@floors\@empty
     \else
@@ -387,10 +678,10 @@ and the derived files           braids.ins,
       \advance\braid@ty by \braid@height
       \braid@ny=\braid@ty
       \advance\braid@ny by \braid@height
-      \edef\braidsx{\the\braid@tx}
-      \edef\braidsy{\the\braid@ty}
-      \edef\braidex{\the\braid@nx}
-      \edef\braidey{\the\braid@ny}
+      \edef\floorsx{\the\braid@tx}
+      \edef\floorsy{\the\braid@ty}
+      \edef\floorex{\the\braid@nx}
+      \edef\floorey{\the\braid@ny}
       \let\tikz@options=\pgfutil@empty
 % Load general floor style options
     \expandafter\tikzset\expandafter{\braid@floors@style}
@@ -449,34 +740,58 @@ and the derived files           braids.ins,
           \iftikz@mode@draw draw\fi%
       }}%
       \tikz@temp
+\ifx\braid@name\pgfutil@empty
+\else
+% label the ends of the strand
+\coordinate (\braid@name-\braid@path@origin-e) at (\braid@tx,\braid@ty);
+\coordinate (\braid@name-rev-\braid@k-e) at (\braid@tx,\braid@ty);
+\braid@nx=\braid@path@origin\braid@width
+\coordinate (\braid@name-\braid@path@origin-s) at (\braid@nx,0pt);
+\coordinate (\braid@name-rev-\braid@k-s) at (\braid@nx,0pt);
+\fi
 % Close the scope
    \pgfsys@endscope
   }
-
+    \ifx\braid@name\pgfutil@empty
+    \else
+    \braid@tx=\value{braid@strands}\braid@width
+    \braid@ty=\value{braid@level}\braid@height
+    \advance\braid@ty by 2\braid@eh
+    \advance\braid@tx by \braid@width
+    \braid@tx=.5\braid@tx
+    \braid@ty=.5\braid@ty
+    \coordinate (\braid@name) at (\braid@tx,\braid@ty);
+    \fi
+    \pgfsys@endscope
   \endgroup}
-
-\def\braid@start{%
-  \@ifnextchar[{\braid@start@opt}{\braid@start@noopt}%
-}
-
-\def\braid@start@opt[#1]{%
-  \pgfkeys{/pgf/braid/.cd,#1}\braid@start@noopt}
-
-\def\braid@start@noopt{%
-    \let\braid@options\tikz@options
-  \setcounter{braid@strands}{\pgfkeysvalueof{/pgf/braid/number of strands}}%
-    \setcounter{braid@level}{-1}%
-    \let\braid@label\@empty
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{\braid@start}
+% This starts off the braid, initialising a load of stuff.
+%    \begin{macrocode}
+\def\braid@start#1{%
+      \pgfsys@beginscope
+      \setcounter{braid@level}{-1}%
+      \let\braid@label\@empty
       \let\braid@floors\@empty
+      \let\braid@name\empty
+      \pgfkeys{/pgf/braid/.cd,#1}
+      \let\braid@options\tikz@options
+      \setcounter{braid@strands}{\pgfkeysvalueof{/pgf/braid/number of           strands}}%
     \braid@width=\pgfkeysvalueof{/pgf/braid/width}
     \braid@height=\pgfkeysvalueof{/pgf/braid/height}
     \braid@eh=\pgfkeysvalueof{/pgf/braid/border height}
     \braid@height=-\braid@height
     \braid@eh=-\braid@eh
     \braid@increase@leveltrue
-    \braid@process
+    \braid@process@start
 }
-
+%    \end{macrocode}
+% \end{macro}
+%
+% These are the lengths we'll use as we construct the braid
+%    \begin{macrocode}
 \newdimen\braid@width
 \newdimen\braid@height
 \newdimen\braid@tx
@@ -486,15 +801,28 @@ and the derived files           braids.ins,
 \newdimen\braid@cy
 \newdimen\braid@dy
 \newdimen\braid@eh
-
+%    \end{macrocode}
+%
+% An if to decide whether or not to step to the next level or not
+%    \begin{macrocode}
 \newif\ifbraid@increase@level
-
+%    \end{macrocode}
+%
+% Some initial values
+%    \begin{macrocode}
 \let\braid@style\pgfutil@empty
 \let\braid@floors@style\pgfutil@empty
 \def\braid@over@cross{1}
-
+%    \end{macrocode}
+%
+% Counters to track the strands and the levels.
+%    \begin{macrocode}
 \newcounter{braid@level}
 \newcounter{braid@strands}
+%    \end{macrocode}
+%
+% All the keys we'll use.
+%    \begin{macrocode}
 \pgfkeys{
     /tikz/braid/.search also={/pgf},
     /pgf/braid/.search also={/pgf,/tikz},
@@ -503,6 +831,12 @@ and the derived files           braids.ins,
     height/.initial=1cm,
     width/.initial=1cm,
     border height/.initial=.25cm,
+    name/.code={%
+      \def\braid@name{#1}%
+    },
+    at/.code={%
+      \braid@relocate{#1}%
+    },
     floor command/.code={%
       \def\braid@render@floor{#1}%
     },
