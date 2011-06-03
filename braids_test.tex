@@ -1,3 +1,4 @@
+\immediate\write18{tex braids.dtx}
 \documentclass{article}
 \usepackage{tikz}
 \usepackage{braids}
@@ -21,7 +22,7 @@
 
 
 \begin{tikzpicture}
-\braid[line width=2pt,style strand={1}{red},style strand={2}{blue},style strand={3}{green}] s_1 s_2^{-1} s_1 s_2^{-1} s_1 s_2^{-1};
+\braid[line width=2pt,style strand={1}{red},style strand={2}{blue},style strand={3}{green},rotate=90] s_1 s_2^{-1} s_1 s_2^{-1} s_1 s_2^{-1};
 \end{tikzpicture}
 
 \begin{tikzpicture}
@@ -35,7 +36,13 @@
   line width=2pt,
   style strand={1}{red},
   style strand={2}{blue},
-  style strand={3}{green}
+  style strand={3}{green},
+  rotate=90
 ]| s_1-s_3-s_5 | s_2^{-1}-s_4| s_1-s_4 s_2^{-1} s_1-s_3 s_2^{-1}-s_4^{-1};
 \end{tikzpicture}
 \end{document}
+
+
+% Local Variables:
+% tex-output-type: "pdf18"
+% End:

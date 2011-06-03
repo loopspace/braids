@@ -470,17 +470,14 @@ and the derived files           braids.ins,
 % \begin{macro}{\braid@relocate}
 % This is the macro that actually does the relocation.
 %
-% TODO: Change the method of getting the coordinate to use \tikz@scan@one@point
+% TODO: Change the method of getting the coordinate to use \Verb+\tikz@scan@one@point+
 %    \begin{macrocode}
 \def\braid@relocate#1{%
-  \path #1;
-  \pgfgetlastxy{\braid@loc@x}{\braid@loc@y}
-  \braid@tx=0pt
-  \braid@ty=0pt
-  \advance\braid@tx by \braid@loc@x
-  \advance\braid@ty by \braid@loc@y
-  \advance\braid@tx by -\braid@width
-  \pgftransformshift{\pgfqpoint{\braid@tx}{\braid@ty}}
+  \tikz@scan@one@point\braid@@relocate#1}
+\def\braid@@relocate#1{%
+  #1
+  \advance\pgf@x by -\braid@width
+  \pgftransformshift{\pgfqpoint{\pgf@x}{\pgf@y}}
   \braid@process@start%
 }
 %    \end{macrocode}
@@ -780,6 +777,7 @@ and the derived files           braids.ins,
       \let\braid@name\empty
       \pgfkeys{/pgf/braid/.cd,#1}
       \let\braid@options\tikz@options
+  \tikz@transform
       \setcounter{braid@strands}{\pgfkeysvalueof{/pgf/braid/number of           strands}}%
     \braid@width=\pgfkeysvalueof{/pgf/braid/width}
     \braid@height=\pgfkeysvalueof{/pgf/braid/height}
