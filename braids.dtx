@@ -126,7 +126,7 @@ and the derived files           braids.ins,
 % \DoNotIndex{\newcommand,\newenvironment}
 %
 % \providecommand*{\url}{\texttt}
-% \GetFileInfo{brqids.dtx}
+% \GetFileInfo{braids.sty}
 % \title{The \textsf{braids} package: codebase}
 % \author{Andrew Stacey \\ \url{stacey@math.ntnu.no}}
 % \date{\fileversion~from \filedate}
@@ -151,6 +151,14 @@ and the derived files           braids.ins,
 %<*package>
 % \fi
 %
+% Test the version of PGF to see if it's what we expect.
+% \begin{macrocode}
+\def\braid@pgfversion{2.10}%
+\ifx\pgfversion\braid@pgfversion
+\else
+\PackageWarning{braids}{This package was designed using PGF2.10; you are using \pgfversion.}%
+\fi
+% \end{macrocode}%
 % \begin{macro}{\ge@addto@macro}
 % This is an expanded version of \Verb+\g@addto@macro+.
 % Namely, it adds the \emph{expansion} of the second argument to the first.
@@ -217,6 +225,8 @@ and the derived files           braids.ins,
 % \begin{macro}{\braid@handle}
 % This is the main handler for parsing the braid word.
 % It decides what action to take depending on what the token is.
+% We have to be a bit careful with catcodes, some packages set
+% ; and | to be active.
 %    \begin{macrocode}
 \let\braid@semicolon=;
 \let\braid@bar=|
@@ -323,7 +333,7 @@ and the derived files           braids.ins,
 % This is our error message for not getting an error
 %    \begin{macrocode}
 \def\braid@location@error{%
-  \errmessage{Could not figure out location for braid}%
+  \PackageWarning{braids}{Could not figure out location for braid}%
   \braid@process@start%
 }
 %    \end{macrocode}
@@ -340,8 +350,6 @@ and the derived files           braids.ins,
 %
 % \begin{macro}{\braid@relocate}
 % This is the macro that actually does the relocation.
-%
-% TODO: Change the method of getting the coordinate to use \Verb+\tikz@scan@one@point+
 %    \begin{macrocode}
 \def\braid@relocate#1{%
   \tikz@scan@one@point\braid@@relocate#1}
@@ -563,7 +571,7 @@ and the derived files           braids.ins,
     \expandafter\tikzset\expandafter{\braid@floor@style}
     \fi
 \tikz@options
-      \braid@render@floor
+\braid@render@floor
 \pgfsys@endscope
     }
     \pgfsys@endscope

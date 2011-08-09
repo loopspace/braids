@@ -1,3 +1,4 @@
+\immediate\write18{tex braids.dtx}
 \documentclass{ltxdoc}
 \usepackage[T1]{fontenc}
 \usepackage{lmodern}
@@ -31,7 +32,7 @@
 }
 
 \providecommand*{\url}{\texttt}
-\GetFileInfo{brqids.dtx}
+\GetFileInfo{braids.sty}
 
 \title{The \textsf{braids} Package: Documentation}
 \author{Andrew Stacey \\ \url{stacey@math.ntnu.no}}
@@ -54,8 +55,8 @@ An example follows.
 
 \begin{example}
 \begin{center}
-\begin{tikzpicture}[rotate=90]
-\braid[style strand={1}{red},style strand={2}{blue},style strand={3}{green}] s_1 s_2^{-1} s_1 s_2^{-1} s_1 s_2^{-1};
+\begin{tikzpicture}
+\braid[rotate=90,style strand={1}{red},style strand={2}{blue},style strand={3}{green}] s_1 s_2^{-1} s_1 s_2^{-1} s_1 s_2^{-1};
 \end{tikzpicture}
 \end{center}
 \end{example}
@@ -85,7 +86,7 @@ The centre has the label \Verb+name+, the strands are labelled \Verb+name-number
 If the version with \Verb+rev+ is used then the numbers correspond to the \emph{final} positions of the braids.
 The name can also be specified with the \Verb+name+ key.
 
-The (options) \Verb+at (coordinate)+ syntax positions the braid at the \Verb+coordinate+ in the current picture.
+The (optional) \Verb+at (coordinate)+ syntax positions the braid at the \Verb+coordinate+ in the current picture.
 Due to the implementation, the coordinate has to be known at the start, but the width and height of the braid are only known at the end.
 Therefore, the braid is positioned so that the start of the first strand is at \Verb+(coordinate)+.
 This can also be specified using the \Verb+at+ key.
@@ -141,9 +142,6 @@ Any other style options are passed to the underlying TikZ/PGF system and so may 
 \section{Example}
 
 Here is a more detailed example.
-(Note that the floors are not drawn in the below.
-I have no idea why that is as they work when this example is put in a standalone file.
-It is presumably something to do with the documentation packages.)
 
 
 \begin{example}
@@ -153,7 +151,6 @@ It is presumably something to do with the documentation packages.)
   style floors={fill=yellow},
   style floor={1}{dashed,fill=yellow!50!green},
   floor command={%
-  \message{drawing floor}
    \fill (\floorsx,\floorsy) rectangle (\floorex,\floorey);
    \draw (\floorsx,\floorsy) -- (\floorex,\floorsy);
   },
