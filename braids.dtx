@@ -11,6 +11,7 @@ See http://www.latex-project.org/lppl.txt
 ----------------------------------------------------------------
 
 This package defines some commands for drawing braid diagrams with TikZ/PGF.
+The initial idea of this package came from a question and answer on the site http://tex.stackexchange.com.
 %</readme>
 %<*internal>
 \fi
@@ -46,10 +47,13 @@ http://www.latex-project.org/lppl.txt
 This work is "maintained" (as per LPPL maintenance status) by
 Andrew Stacey.
 
-This work consists of the file  braids.dtx
-and the derived files           braids.ins,
-                                braids.pdf, and
-                                braids.sty.
+This work consists of the files  braids.dtx
+                                 braids_doc.tex
+and the derived files            README.txt,
+                                 braids.ins,
+                                 braids.pdf,
+                                 braids.sty,
+                                 braids_doc.pdf.
 
 \endpostamble
 \usedir{tex/latex/braids}
@@ -135,13 +139,14 @@ and the derived files           braids.ins,
 % 
 % \begin{center}
 % \begin{tikzpicture}
-% \braid[line width=3pt,line cap=round,style strand={1}{blue},number of strands=7] s_1 s_2 s_5^{-1};
+% \braid[line width=3pt,line cap=round,style strands={1}{blue},number of strands=7] s_1 s_2 s_5^{-1};
 % \end{tikzpicture}
 % \end{center}
 % 
 % \section{Introduction}
 % 
 % This is a package for drawing braid diagrams using PGF/TikZ.
+% Its inspiration was a question and answer on the website \url{http://tex.stackexchange.com}.
 %
 % \StopEventually{}
 %
@@ -152,6 +157,7 @@ and the derived files           braids.ins,
 % \fi
 %
 % Test the version of PGF to see if it's what we expect.
+% If not, issue a warning (but continue anyway; after all, it \emph{might just work}).
 % \begin{macrocode}
 \def\braid@pgfversion{2.10}%
 \ifx\pgfversion\braid@pgfversion
@@ -172,7 +178,7 @@ and the derived files           braids.ins,
 % \end{macro}
 % \begin{macro}{\braid}
 % This is the user command.
-% We start a group to ensure that all our assignments are local, and then call our initialisation code
+% We start a group to ensure that all our assignments are local, and then call our initialisation code.
 %    \begin{macrocode}
 \newcommand{\braid}[1][]{%
   \begingroup
@@ -183,6 +189,8 @@ and the derived files           braids.ins,
 % \begin{macro}{\braid@process}
 % This is the token swallower.
 % This takes the next token on the braid specification and passes it to the handler command which decides what to do next.
+% (Incidentally, the code here is heavily influenced by TikZ.
+% That's probably not very surprising.)
 %    \begin{macrocode}
 \def\braid@process{%
   \afterassignment\braid@handle\let\braid@token=%
@@ -192,6 +200,7 @@ and the derived files           braids.ins,
 %
 % \begin{macro}{\braid@process@start}
 % This is a variant of \Verb+\braid@process+ which is used at the start where we might have a few extra bits and pieces before the braid itself starts.
+% Specifically, we test for the \Verb+at+ and \Verb+(name)+ possibilities.
 %    \begin{macrocode}
 \def\braid@process@start{%
   \afterassignment\braid@handle@start\let\braid@token=%
@@ -226,7 +235,8 @@ and the derived files           braids.ins,
 % This is the main handler for parsing the braid word.
 % It decides what action to take depending on what the token is.
 % We have to be a bit careful with catcodes, some packages set
-% ; and | to be active.
+% \Verb+;+ and \Verb+|+ to be active.
+% We should probably also be careful with \Verb+^+ and \Verb+_+.
 %    \begin{macrocode}
 \let\braid@semicolon=;
 \let\braid@bar=|
@@ -719,16 +729,27 @@ and the derived files           braids.ins,
     floor command/.code={%
       \def\braid@render@floor{#1}%
     },
-    style strand/.code 2 args={%
-      \expandafter\def\csname braid@options@strand@#1\endcsname{#2}
+    style strands/.code 2 args={%
+      \def\braid@temp{#2}%
+      \braidset{style each strand/.list={#1}}%
     },
-    style floor/.code 2 args={%
-      \expandafter\def\csname braid@options@floor@#1\endcsname{#2}
+    style each strand/.code={%
+      \expandafter\edef\csname braid@options@strand@#1\endcsname{\braid@temp}%
     },
-    style floors/.code={%
+    style floors/.code 2 args={%
+      \def\braid@temp{#2}%
+      \braidset{style each floor/.list={#1}}%
+    },
+    style each floor/.code={%
+      \expandafter\edef\csname braid@options@floor@#1\endcsname{\braid@temp}%
+    },
+    style all floors/.code={%
       \def\braid@floors@style{#1}
     }
 }
+
+\def\braidset#1{%
+  \pgfkeys{/pgf/braid/.cd,#1}}
 %    \end{macrocode}
 % \iffalse
 %</package>
