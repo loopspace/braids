@@ -11,6 +11,7 @@ See http://www.latex-project.org/lppl.txt
 ----------------------------------------------------------------
 
 This package defines some commands for drawing braid diagrams with TikZ/PGF.
+It was designed and tested with PGF2.10.
 The initial idea of this package came from a question and answer on the site http://tex.stackexchange.com.
 %</readme>
 %<*internal>
@@ -107,6 +108,7 @@ and the derived files            README.txt,
 %</driver>
 % \fi
 %
+% \CheckSum{815}
 %
 % \CharacterTable
 %  {Upper-case    \A\B\C\D\E\F\G\H\I\J\K\L\M\N\O\P\Q\R\S\T\U\V\W\X\Y\Z
@@ -395,7 +397,7 @@ and the derived files            README.txt,
 % Then we parse the coordinate and call the relocation macro.
 %    \begin{macrocode}
 \def\braid@locate#1){%
-  \tikz@scan@one@point\braid@relocate{(#1)}%
+  \tikz@scan@one@point\braid@relocate(#1)%
 }
 %    \end{macrocode}
 % \end{macro}
