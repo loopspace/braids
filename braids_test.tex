@@ -5,9 +5,13 @@
 
 \begin{document}
 \begin{tikzpicture}
-\def\brint{0.5-0.2}
-\pgfpathcurvebetweentime{0}{\brint}{\pgfpointxy{0}{0}}{\pgfpointxy{1}{0}}{\pgfpointxy{2}{0}}{\pgfpointxy{3}{3}}
-\pgfmathsetmacro{\bht}{0.3333}
+\begin{scope}[yshift=2cm]
+\foreach \brtime in {0.1,0.2,...,1} {
+\pgfpathcurvebetweentime{0}{\brtime}{\pgfpointxy{0}{\brtime}}{\pgfpointxy{0}{\brtime}}{\pgfpointxy{3}{\brtime}}{\pgfpointxy{3}{\brtime}}
+}
+\end{scope}
+
+\pgfmathsetmacro{\bht}{0}
 \draw (0,0) .. controls +(0,\bht) and +(0,-\bht) .. (1,1);
 \draw (1,0) .. controls +(0,\bht) and +(0,-\bht) .. (0,1);
 \begin{scope}[xshift=2cm]
@@ -26,12 +30,13 @@
   style strands={1}{red},
   style strands={2}{green},
   style strands={3}{blue},
-  width=.5cm,
   height=.95cm,
-  gap=0.17,
-  strand label by origin=true,
+  gap=0.1,
+  control factor=0,
+  nudge factor=0,
+  strand label by origin=false,
   strand label/.style={circle,draw,fill=white,inner sep=0pt},
-  yscale=1] (braid_1) a_2 \label[fill=blue!25]{2}{\(+\)} \label{1}{\(-\)} a_1 a_2^{-1};
+  yscale=1] (braid_1) a_2 \label[fill=blue!25]{2}{\(+\)} \label{1}{\(-\)} a_1 a_2^{-1} \label[fill=red!50!blue]{1}{\(=\)} a_3;
 %\node [at=(braid_1-1-s),circle,draw] {};
 \end{tikzpicture}
 

@@ -81,7 +81,7 @@ and the derived files            README.txt,
 %</internal>
 %<*package>
 \NeedsTeXFormat{LaTeX2e}
-\ProvidesPackage{braids}[2011/05/07 v1.0 Tikz/PGF commands for drawing braid diagrams]
+\ProvidesPackage{braids}[2011/10/18 v1.1 Tikz/PGF commands for drawing braid diagrams]
 %</package>
 %<*driver>
 \documentclass{ltxdoc}
@@ -108,7 +108,7 @@ and the derived files            README.txt,
 %</driver>
 % \fi
 %
-% \CheckSum{815}
+% \CheckSum{1078}
 %
 % \CharacterTable
 %  {Upper-case    \A\B\C\D\E\F\G\H\I\J\K\L\M\N\O\P\Q\R\S\T\U\V\W\X\Y\Z
@@ -150,6 +150,14 @@ and the derived files            README.txt,
 % This is a package for drawing braid diagrams using PGF/TikZ.
 % Its inspiration was a question and answer on the website \url{http://tex.stackexchange.com}.
 %
+% \section{History}
+%
+% \begin{itemize}
+% \item v1.0 First public release.
+%
+% \item v1.1 Added ability to configure the gap size, the control points, and the ``nudge''.
+% Added ability to add labels to strands between crossings.
+% \end{itemize}
 % \StopEventually{}
 %
 % \section{Implementation}
@@ -324,13 +332,17 @@ and the derived files            README.txt,
 %    \begin{macrocode}
    \braid@endscope
   \else
-  \ifx\braid@token\braid@label@strand
-   \let\braid@next=\braid@label@strand
+  \ifx\braid@token\braid@olabel@strand
+   \let\braid@next=\braid@olabel@strand
+  \else
+  \ifx\braid@token\braid@clabel@strand
+   \let\braid@next=\braid@clabel@strand
   \else
 %    \end{macrocode}
 % Otherwise, we add the token to the braid label.
 %    \begin{macrocode}
   \ge@addto@macro\braid@label{\braid@token}%
+  \fi
   \fi
   \fi
   \fi
@@ -523,12 +535,12 @@ and the derived files            README.txt,
   \braid@ny=\braid@ty
   \advance\braid@nx by \braid@width
   \advance\braid@ny by \braid@height
+  \advance\braid@ty by \braid@nf\braid@height
+  \advance\braid@ny by -\braid@nf\braid@height
   \braid@cy=\braid@ty
   \braid@dy=\braid@ny
-  \advance\braid@cy by .5\braid@height
-  \advance\braid@dy by -.5\braid@height
-  \advance\braid@ty by .05\braid@height
-  \advance\braid@ny by -.05\braid@height
+  \advance\braid@cy by \braid@cf\braid@height
+  \advance\braid@dy by -\braid@cf\braid@height
 %    \end{macrocode}
 % Now we try to find a starting point for the strand ending here.
 % We might not have used this strand before, so it might not exist.
@@ -637,24 +649,36 @@ and the derived files            README.txt,
 %    \end{macrocode}
 % \end{macro}
 %
-% \begin{macro}{\braid@label@strand}
+% \begin{macro}{\braid@olabel@strand}
 % This macro allows us to label a strand just before a crossing.
 % The first argument is the strand number at that particular crossing and the second is the label.
 % We also save the current height.
+% This version takes the strand number as meaning the \emph{original} ordering.
 %    \begin{macrocode}
-\newcommand{\braid@label@strand}[3][]{%
+\newcommand{\braid@olabel@strand}[3][]{%
   \edef\braid@tmp{{\the\value{braid@level}}}%
-  \ifbraid@strand@labels@absolute
   \expandafter\ifx\csname braid@strand@#2@origin\endcsname\relax
   \g@addto@macro\braid@tmp{{#2}}%
   \else
   \edef\braid@tmpa{{\csname braid@strand@#2@origin\endcsname}}%
   \ge@addto@macro\braid@tmp{\braid@tmpa}%
   \fi
-  \else
-  \g@addto@macro\braid@tmp{{#2}}%
-  \fi
   \g@addto@macro\braid@tmp{{#3}{#1}}%
+  \ge@addto@macro{\braid@strand@labels}{\braid@tmp}%
+  \braid@process%
+}
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{\braid@clabel@strand}
+% This macro allows us to label a strand just before a crossing.
+% The first argument is the strand number at that particular crossing and the second is the label.
+% We also save the current height.
+% This version takes the strand number as meaning the \emph{current} ordering.
+%    \begin{macrocode}
+\newcommand{\braid@clabel@strand}[3][]{%
+  \edef\braid@tmp{{\the\value{braid@level}}}%
+  \g@addto@macro\braid@tmp{{#2}{#3}{#1}}%
   \ge@addto@macro{\braid@strand@labels}{\braid@tmp}%
   \braid@process%
 }
@@ -986,14 +1010,22 @@ and the derived files            README.txt,
   \let\braid@strand@labels\@empty
   \let\braid@floors\@empty
   \let\braid@name\empty
-  \let\label=\braid@label@strand
-  \pgfkeys{/pgf/braid/.cd,#1}
+  \let\clabel=\braid@clabel@strand
+  \let\olabel=\braid@olabel@strand
+  \pgfkeys{/pgf/braid/.cd,#1}%
+  \ifbraid@strand@labels@origin
+  \let\label=\braid@olabel@strand
+  \else
+  \let\label=\braid@clabel@strand
+  \fi
   \let\braid@options\tikz@options
   \tikz@transform
   \setcounter{braid@strands}{\pgfkeysvalueof{/pgf/braid/number of           strands}}%
-  \braid@width=\pgfkeysvalueof{/pgf/braid/width}
-  \braid@height=\pgfkeysvalueof{/pgf/braid/height}
-  \braid@eh=\pgfkeysvalueof{/pgf/braid/border height}
+  \braid@width=\pgfkeysvalueof{/pgf/braid/width}%
+  \braid@height=\pgfkeysvalueof{/pgf/braid/height}%
+  \braid@eh=\pgfkeysvalueof{/pgf/braid/border height}%
+  \pgfkeysgetvalue{/pgf/braid/control factor}{\braid@cf}%
+  \pgfkeysgetvalue{/pgf/braid/nudge factor}{\braid@nf}%
   \braid@height=-\braid@height
   \braid@eh=-\braid@eh
   \braid@increase@leveltrue
@@ -1021,7 +1053,7 @@ and the derived files            README.txt,
 %    \end{macrocode}
 % An if to decide whether label indices should be absolute or not
 %    \begin{macrocode}
-\newif\ifbraid@strand@labels@absolute
+\newif\ifbraid@strand@labels@origin
 %    \end{macrocode}
 %
 %
@@ -1055,6 +1087,8 @@ and the derived files            README.txt,
     width/.initial=1cm,
     gap/.initial=.1,
     border height/.initial=.25cm,
+    control factor/.initial=.5,
+    nudge factor/.initial=.05,
     name/.code={%
       \def\braid@name{#1}%
     },
@@ -1082,7 +1116,7 @@ and the derived files            README.txt,
       \def\braid@floors@style{#1}
     },
     strand label/.style={},
-    strand label by origin/.is if=braid@strand@labels@absolute
+    strand label by origin/.is if=braid@strand@labels@origin,
 }
 %    \end{macrocode}
 % \begin{macro}{\braidset}
