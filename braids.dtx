@@ -288,7 +288,18 @@ and the derived files            README.txt,
 %    \begin{macrocode}
    \braid@increase@levelfalse
   \else
-  \ifx\braid@token[
+  \ifx\braid@token1%
+%    \end{macrocode}
+% 1: this means the ``identity'' crossing, so no crossing here.
+% Increase the level, unless overriden, and add to the label.
+%    \begin{macrocode}
+   \ifbraid@increase@level
+    \stepcounter{braid@level}
+   \fi
+   \braid@increase@leveltrue
+   \ge@addto@macro\braid@label{\braid@token}%
+  \else
+  \ifx\braid@token[%
 %    \end{macrocode}
 % Open bracket, this means we have some more options to process.
 %    \begin{macrocode}
@@ -313,10 +324,15 @@ and the derived files            README.txt,
 %    \begin{macrocode}
    \braid@endscope
   \else
+  \ifx\braid@token\braid@label@strand
+   \let\braid@next=\braid@label@strand
+  \else
 %    \end{macrocode}
 % Otherwise, we add the token to the braid label.
 %    \begin{macrocode}
   \ge@addto@macro\braid@label{\braid@token}%
+  \fi
+  \fi
   \fi
   \fi
   \fi
@@ -566,7 +582,10 @@ and the derived files            README.txt,
 %    \end{macrocode}
 % Curve across to the next position.
 % Depending on the crossing type, we either have a single curve or we have to break it in two.
+% Our gap is to interrupt at times determined by the gap key.
 %    \begin{macrocode}
+\pgfmathsetmacro{\braid@gst}{0.5 - \pgfkeysvalueof{/pgf/braid/gap}}%
+\pgfmathsetmacro{\braid@gend}{0.5 + \pgfkeysvalueof{/pgf/braid/gap}}%
 \ifx\braid@crossing@type\braid@over@cross
 %    \end{macrocode}
 % We're on the overpass, so just one curve needed.
@@ -575,10 +594,9 @@ and the derived files            README.txt,
 \else
 %    \end{macrocode}
 % We're on the underpass, so we need to interrupt our path to allow the other curve to go past.
-% The choice of \Verb+.4+ and \Verb+.6+ should probably be configurable.
 %    \begin{macrocode}
-\pgfpathcurvebetweentimecontinue{0}{.4}{\pgfqpoint{\braid@tx}{\braid@ty}}{\pgfqpoint{\braid@tx}{\braid@cy}}{\pgfqpoint{\braid@nx}{\braid@dy}}{\pgfqpoint{\braid@nx}{\braid@ny}}
-\pgfpathcurvebetweentime{.6}{1}{\pgfqpoint{\braid@tx}{\braid@ty}}{\pgfqpoint{\braid@tx}{\braid@cy}}{\pgfqpoint{\braid@nx}{\braid@dy}}{\pgfqpoint{\braid@nx}{\braid@ny}}
+\pgfpathcurvebetweentimecontinue{0}{\braid@gst}{\pgfqpoint{\braid@tx}{\braid@ty}}{\pgfqpoint{\braid@tx}{\braid@cy}}{\pgfqpoint{\braid@nx}{\braid@dy}}{\pgfqpoint{\braid@nx}{\braid@ny}}
+\pgfpathcurvebetweentime{\braid@gend}{1}{\pgfqpoint{\braid@tx}{\braid@ty}}{\pgfqpoint{\braid@tx}{\braid@cy}}{\pgfqpoint{\braid@nx}{\braid@dy}}{\pgfqpoint{\braid@nx}{\braid@ny}}
 \fi
 %    \end{macrocode}
 % We're done with this path, so now we save it.
@@ -590,8 +608,8 @@ and the derived files            README.txt,
   \pgfsyssoftpath@setcurrentpath{\braid@next@path}
   \pgfpathlineto{\pgfqpoint{\braid@nx}{\braid@ty}}
 \ifx\braid@crossing@type\braid@over@cross
-\pgfpathcurvebetweentimecontinue{0}{.4}{\pgfqpoint{\braid@nx}{\braid@ty}}{\pgfqpoint{\braid@nx}{\braid@cy}}{\pgfqpoint{\braid@tx}{\braid@dy}}{\pgfqpoint{\braid@tx}{\braid@ny}}
-\pgfpathcurvebetweentime{.6}{1}{\pgfqpoint{\braid@nx}{\braid@ty}}{\pgfqpoint{\braid@nx}{\braid@cy}}{\pgfqpoint{\braid@tx}{\braid@dy}}{\pgfqpoint{\braid@tx}{\braid@ny}}
+\pgfpathcurvebetweentimecontinue{0}{\braid@gst}{\pgfqpoint{\braid@nx}{\braid@ty}}{\pgfqpoint{\braid@nx}{\braid@cy}}{\pgfqpoint{\braid@tx}{\braid@dy}}{\pgfqpoint{\braid@tx}{\braid@ny}}
+\pgfpathcurvebetweentime{\braid@gend}{1}{\pgfqpoint{\braid@nx}{\braid@ty}}{\pgfqpoint{\braid@nx}{\braid@cy}}{\pgfqpoint{\braid@tx}{\braid@dy}}{\pgfqpoint{\braid@tx}{\braid@ny}}
 \else
   \pgfpathcurveto{\pgfqpoint{\braid@nx}{\braid@cy}}{\pgfqpoint{\braid@tx}{\braid@dy}}{\pgfqpoint{\braid@tx}{\braid@ny}}
 \fi
@@ -619,6 +637,30 @@ and the derived files            README.txt,
 %    \end{macrocode}
 % \end{macro}
 %
+% \begin{macro}{\braid@label@strand}
+% This macro allows us to label a strand just before a crossing.
+% The first argument is the strand number at that particular crossing and the second is the label.
+% We also save the current height.
+%    \begin{macrocode}
+\newcommand{\braid@label@strand}[3][]{%
+  \edef\braid@tmp{{\the\value{braid@level}}}%
+  \ifbraid@strand@labels@absolute
+  \expandafter\ifx\csname braid@strand@#2@origin\endcsname\relax
+  \g@addto@macro\braid@tmp{{#2}}%
+  \else
+  \edef\braid@tmpa{{\csname braid@strand@#2@origin\endcsname}}%
+  \ge@addto@macro\braid@tmp{\braid@tmpa}%
+  \fi
+  \else
+  \g@addto@macro\braid@tmp{{#2}}%
+  \fi
+  \g@addto@macro\braid@tmp{{#3}{#1}}%
+  \ge@addto@macro{\braid@strand@labels}{\braid@tmp}%
+  \braid@process%
+}
+%    \end{macrocode}
+% \end{macro}
+%
 % \begin{macro}{\braid@floors@trim}
 % The list of floors, if given, will start with a superfluous comma.
 % This removes it.
@@ -632,6 +674,102 @@ and the derived files            README.txt,
 %    \begin{macrocode}
 \def\braid@render@floor{%
     \draw (\floorsx,\floorsy) rectangle (\floorex,\floorey);
+}
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{\braid@render@strand@labels}
+% This starts rendering the labels on the strands at the crossings.
+%    \begin{macrocode}
+\def\braid@render@strand@labels#1{%
+  \def\braid@tmp{#1}%
+  \ifx\braid@tmp\pgfutil@empty
+  \let\braid@next=\pgfutil@gobble
+  \else
+  \let\braid@next=\braid@@render@strand@labels
+  \fi
+  \braid@next{#1}%  
+}
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{\braid@@render@strand@labels}
+% This is the actual renderer.
+%    \begin{macrocode}
+\def\braid@@render@strand@labels#1#2#3#4{%
+  \begingroup
+  \pgfscope
+  \let\tikz@options=\pgfutil@empty
+  \let\tikz@mode=\pgfutil@empty
+  \let\tik@transform=\pgfutil@empty
+  \let\tikz@fig@name=\pgfutil@empty
+  \tikzset{/pgf/braid/strand label,#4}%
+  \braid@nx=#2\braid@width
+  \braid@ny=#1\braid@height
+  \advance\braid@ny by \braid@eh
+  \advance\braid@ny by \braid@height
+  \pgftransformshift{\pgfqpoint{\braid@nx}{\braid@ny}}%
+  \tikz@options
+  \setbox\pgfnodeparttextbox=\hbox%
+  \bgroup%
+  \tikzset{every text node part/.try}%
+  \ifx\tikz@textopacity\pgfutil@empty%
+  \else%
+  \pgfsetfillopacity{\tikz@textopacity}%
+  \pgfsetstrokeopacity{\tikz@textopacity}%
+  \fi%
+  \pgfinterruptpicture%
+  \tikz@textfont%  
+  \ifx\tikz@text@width\pgfutil@empty%
+  \else%
+  \begingroup%
+  \pgfmathsetlength{\pgf@x}{\tikz@text@width}%
+  \pgfutil@minipage[t]{\pgf@x}\leavevmode\hbox{}%
+  \tikz@text@action%
+  \fi%
+  \tikz@atbegin@node%
+  \bgroup%
+  \aftergroup\unskip%
+  \ifx\tikz@textcolor\pgfutil@empty%
+  \else%
+  \pgfutil@colorlet{.}{\tikz@textcolor}%
+  \fi%
+  \pgfsetcolor{.}%
+  \setbox\tikz@figbox=\box\pgfutil@voidb@x%
+  \tikz@uninstallcommands%
+  \tikz@halign@check%
+  \ignorespaces%
+  #3
+  \egroup
+  \tikz@atend@node%
+  \ifx\tikz@text@width\pgfutil@empty%
+  \else%
+  \pgfutil@endminipage%
+  \endgroup%
+  \fi%
+  \endpgfinterruptpicture%
+  \egroup%
+   \ifx\tikz@text@width\pgfutil@empty%
+    \else%
+      \pgfmathsetlength{\pgf@x}{\tikz@text@width}%
+      \wd\pgfnodeparttextbox=\pgf@x%
+    \fi%
+    \ifx\tikz@text@height\pgfutil@empty%
+    \else%
+      \pgfmathsetlength{\pgf@x}{\tikz@text@height}%
+      \ht\pgfnodeparttextbox=\pgf@x%
+    \fi%
+    \ifx\tikz@text@depth\pgfutil@empty%
+    \else%
+      \pgfmathsetlength{\pgf@x}{\tikz@text@depth}%
+      \dp\pgfnodeparttextbox=\pgf@x%
+    \fi%
+  \pgfmultipartnode{\tikz@shape}{\tikz@anchor}{\tikz@fig@name}{%
+    {\begingroup\tikz@finish}%
+  }%
+  \endpgfscope
+  \endgroup
+  \braid@render@strand@labels%
 }
 %    \end{macrocode}
 % \end{macro}
@@ -823,6 +961,13 @@ and the derived files            README.txt,
     \coordinate (\braid@name) at (\braid@tx,\braid@ty);
     \fi
 %    \end{macrocode}
+% Now we label the strands if needed.
+%    \begin{macrocode}
+  \ifx\braid@strand@labels\pgfutil@empty
+  \else
+   \expandafter\braid@render@strand@labels\braid@strand@labels{}%
+  \fi
+%    \end{macrocode}
 % All done now, close the scope and end the group (which was opened right at the start).
 %    \begin{macrocode}
     \pgfsys@endscope
@@ -835,22 +980,24 @@ and the derived files            README.txt,
 % We start a PGF scope, set the level to \(-1\), the label, floors, and name to empty, process any options we're given, and save certain lengths for later use..
 %    \begin{macrocode}
 \def\braid@start#1{%
-      \pgfsys@beginscope
-      \setcounter{braid@level}{-1}%
-      \let\braid@label\@empty
-      \let\braid@floors\@empty
-      \let\braid@name\empty
-      \pgfkeys{/pgf/braid/.cd,#1}
-      \let\braid@options\tikz@options
+  \pgfsys@beginscope
+  \setcounter{braid@level}{-1}%
+  \let\braid@label\@empty
+  \let\braid@strand@labels\@empty
+  \let\braid@floors\@empty
+  \let\braid@name\empty
+  \let\label=\braid@label@strand
+  \pgfkeys{/pgf/braid/.cd,#1}
+  \let\braid@options\tikz@options
   \tikz@transform
-      \setcounter{braid@strands}{\pgfkeysvalueof{/pgf/braid/number of           strands}}%
-    \braid@width=\pgfkeysvalueof{/pgf/braid/width}
-    \braid@height=\pgfkeysvalueof{/pgf/braid/height}
-    \braid@eh=\pgfkeysvalueof{/pgf/braid/border height}
-    \braid@height=-\braid@height
-    \braid@eh=-\braid@eh
-    \braid@increase@leveltrue
-    \braid@process@start
+  \setcounter{braid@strands}{\pgfkeysvalueof{/pgf/braid/number of           strands}}%
+  \braid@width=\pgfkeysvalueof{/pgf/braid/width}
+  \braid@height=\pgfkeysvalueof{/pgf/braid/height}
+  \braid@eh=\pgfkeysvalueof{/pgf/braid/border height}
+  \braid@height=-\braid@height
+  \braid@eh=-\braid@eh
+  \braid@increase@leveltrue
+  \braid@process@start
 }
 %    \end{macrocode}
 % \end{macro}
@@ -872,6 +1019,11 @@ and the derived files            README.txt,
 %    \begin{macrocode}
 \newif\ifbraid@increase@level
 %    \end{macrocode}
+% An if to decide whether label indices should be absolute or not
+%    \begin{macrocode}
+\newif\ifbraid@strand@labels@absolute
+%    \end{macrocode}
+%
 %
 % Some initial values
 %    \begin{macrocode}
@@ -901,6 +1053,7 @@ and the derived files            README.txt,
     number of strands/.initial=0,
     height/.initial=1cm,
     width/.initial=1cm,
+    gap/.initial=.1,
     border height/.initial=.25cm,
     name/.code={%
       \def\braid@name{#1}%
@@ -927,7 +1080,9 @@ and the derived files            README.txt,
     },
     style all floors/.code={%
       \def\braid@floors@style{#1}
-    }
+    },
+    strand label/.style={},
+    strand label by origin/.is if=braid@strand@labels@absolute
 }
 %    \end{macrocode}
 % \begin{macro}{\braidset}

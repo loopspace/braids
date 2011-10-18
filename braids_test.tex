@@ -5,10 +5,41 @@
 
 \begin{document}
 \begin{tikzpicture}
-\braid (mybraid) at (3,0) s_1 s_2;
-\fill (3,0) circle[radius=2pt];
+\def\brint{0.5-0.2}
+\pgfpathcurvebetweentime{0}{\brint}{\pgfpointxy{0}{0}}{\pgfpointxy{1}{0}}{\pgfpointxy{2}{0}}{\pgfpointxy{3}{3}}
+\pgfmathsetmacro{\bht}{0.3333}
+\draw (0,0) .. controls +(0,\bht) and +(0,-\bht) .. (1,1);
+\draw (1,0) .. controls +(0,\bht) and +(0,-\bht) .. (0,1);
+\begin{scope}[xshift=2cm]
+\pgfmathsetmacro{\bht}{0.3}
+\pgfmathsetmacro{\bdht}{0.1}
+\draw[line width=8pt] (0,-1) -- (0,0) .. controls +(0,\bht) and +(-\bdht,-\bdht) .. (.5,.5) .. controls +(\bdht,\bdht) and +(0,-\bht) .. (1,1) -- +(0,1);
+\draw[line width=8pt,red] (1,0) .. controls +(0,\bht) and +(\bdht,-\bdht) .. (.5,.5) .. controls +(-\bdht,\bdht) and +(0,-\bht) .. (0,1);
+\end{scope}
 \end{tikzpicture}
 
+
+\begin{tikzpicture}
+\braid[
+  number of strands=3,
+  line width=8pt,
+  style strands={1}{red},
+  style strands={2}{green},
+  style strands={3}{blue},
+  width=.5cm,
+  height=.95cm,
+  gap=0.17,
+  strand label by origin=true,
+  strand label/.style={circle,draw,fill=white,inner sep=0pt},
+  yscale=1] (braid_1) a_2 \label[fill=blue!25]{2}{\(+\)} \label{1}{\(-\)} a_1 a_2^{-1};
+%\node [at=(braid_1-1-s),circle,draw] {};
+\end{tikzpicture}
+
+\begin{tikzpicture}
+\braid[gap=0.05,strand label/.style={circle,draw,fill=white,inner sep=0pt}] (mybraid) at (3,0) 1 1 1 s_1 \label{2}{\(+\)} s_1^{-1} \label{3}{\(-\)} s_2;
+\fill (3,0) circle[radius=2pt];
+\end{tikzpicture}
+\end{document}
 \begin{tikzpicture}
 \braid (mybraid) a_3 s_1 s_2;
 \node at (mybraid-1-s) {hello};
