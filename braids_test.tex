@@ -1,9 +1,20 @@
 \immediate\write18{tex braids.dtx}
-\documentclass{article}
+\documentclass[border=10pt]{standalone}
 \usepackage{tikz}
 \usepackage{braids}
 
 \begin{document}
+\begin{tikzpicture}
+\braid[
+  rotate=90,
+  line width=2pt,
+  style strands={1}{red},
+  style strands={2}{blue},
+  style strands={3}{green},
+] a_1 a_2^{-1} a_1 a_2^{-1} a_1 a_2^{-1};
+\end{tikzpicture}
+\end{document}
+
 \begin{tikzpicture}
 \begin{scope}[yshift=2cm]
 \foreach \brtime in {0.1,0.2,...,1} {
