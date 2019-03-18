@@ -7,7 +7,13 @@
 \begin{document}
 
 \begin{tikzpicture}
-\braid a_1 1 a_2;
+\braid[gap=0] a_1-[braid/gap=.1]a_3 [braid/gap=0]a_2;
+\end{tikzpicture}
+
+\vspace{2cm}
+
+\begin{tikzpicture}
+\braid[number of strands=4] a_1 1 1 1 1;
 \end{tikzpicture}
 
 \begin{tikzpicture}
