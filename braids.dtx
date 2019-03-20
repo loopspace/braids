@@ -27,7 +27,7 @@ The initial idea of this package came from a question and answer on the site htt
 \preamble
 ----------------------------------------------------------------
 braids --- a style file for drawing braid diagrams with TikZ/PGF
-E-mail: stacey@math.ntnu.no
+E-mail: loopspace@mathforge.org
 Released under the LaTeX Project Public License v1.3c or later
 See http://www.latex-project.org/lppl.txt
 ----------------------------------------------------------------
@@ -90,18 +90,10 @@ and the derived files            README.txt,
 \documentclass{l3doc}
 \usepackage[T1]{fontenc}
 \usepackage{lmodern}
-%\usepackage{morefloats}
 \usepackage{tikz}
-\usepackage{\jobname}
-\usepackage[numbered]{hypdoc}
-\definecolor{lstbgcolor}{rgb}{0.9,0.9,0.9} 
- 
-\usepackage{listings}
-\lstloadlanguages{[LaTeX]TeX}
-\lstset{breakatwhitespace=true,breaklines=true,language=TeX}
- 
-\usepackage{fancyvrb}
-
+\usepackage{braids}
+\usetikzlibrary{braids}
+                                 
 \EnableCrossrefs
 \CodelineIndex
 \RecordChanges
@@ -111,7 +103,7 @@ and the derived files            README.txt,
 %</driver>
 % \fi
 %
-% \CheckSum{1078}
+% \CheckSum{1798}
 %
 % \CharacterTable
 %  {Upper-case    \A\B\C\D\E\F\G\H\I\J\K\L\M\N\O\P\Q\R\S\T\U\V\W\X\Y\Z
@@ -131,27 +123,22 @@ and the derived files            README.txt,
 %
 %
 % \changes{1.0}{2011/05/03}{Converted to DTX file}
+% \changes{1.1}{2011/05/03}{Extended syntax}
+% \changes{2.0}{2019/03/20}{Converted TikZ library}
 %
 % \DoNotIndex{\newcommand,\newenvironment}
 %
-% \providecommand*{\url}{\texttt}
-% \GetFileInfo{braids.sty}
+% \GetFileInfo{tikzlibrarybraids.code.tex}
 % \title{The \textsf{braids} package: codebase}
-% \author{Andrew Stacey \\ \url{loopspace@mathforge.org}}
+% \author{Andrew Stacey \\ \texttt{loopspace@mathforge.org}}
 % \date{\fileversion~from \filedate}
 % 
 % \maketitle
 % 
-% \begin{center}
-% \begin{tikzpicture}
-% \braid[line width=3pt,line cap=round,style strands={1}{blue},number of strands=7] s_1 s_2 s_5^{-1};
-% \end{tikzpicture}
-% \end{center}
-% 
 % \section{Introduction}
 % 
 % This is a package for drawing braid diagrams using PGF/TikZ.
-% Its inspiration was a question and answer on the website \url{http://tex.stackexchange.com}.
+% Its inspiration was a question and answer on the website \texttt{http://tex.stackexchange.com}.
 %
 % \section{History}
 %
@@ -179,10 +166,14 @@ and the derived files            README.txt,
 \def\braid@pgfversion{2.10}%
 \ifx\pgfversion\braid@pgfversion
 \else
-\PackageWarning{braids}{This package was originally designed using PGF2.10; you are using \pgfversion.}%
+\PackageWarning{braids}{%
+  This package was originally designed using PGF2.10;%
+  you are using \pgfversion.%
+}%
 \fi
 %    \end{macrocode}
-% \begin{macro}{\ge@addto@macro}
+%
+% \begin{macro}[internal]{\ge@addto@macro}
 % This is an expanded version of \Verb+\g@addto@macro+.
 % Namely, it adds the \emph{expansion} of the second argument to the first.
 %    \begin{macrocode}
@@ -193,6 +184,7 @@ and the derived files            README.txt,
   \endgroup}
 %    \end{macrocode}
 % \end{macro}
+%
 % \begin{macro}{\braid}
 % This is the user command.
 % We start a group to ensure that all our assignments are local, and then call our initialisation code.
@@ -204,7 +196,7 @@ and the derived files            README.txt,
 %    \end{macrocode}
 % \end{macro}
 %
-% \begin{macro}{\braid@process}
+% \begin{macro}[internal]{\braid@process}
 % This is the token swallower.
 % This takes the next token on the braid specification and passes it to the handler command (in the macro \Verb+\braid@token+) which decides what to do next.
 % (Incidentally, the code here is heavily influenced by TikZ.
@@ -216,7 +208,7 @@ and the derived files            README.txt,
 %    \end{macrocode}
 % \end{macro}
 %
-% \begin{macro}{\braid@process@start}
+% \begin{macro}[internal]{\braid@process@start}
 % This is a variant of \Verb+\braid@process+ which is used at the start where we might have a few extra bits and pieces before the braid itself starts.
 % Specifically, we test for the \Verb+at+ and \Verb+(name)+ possibilities.
 %    \begin{macrocode}
@@ -225,7 +217,8 @@ and the derived files            README.txt,
 }
 %    \end{macrocode}
 % \end{macro}
-% \begin{macro}{\braid@handle@start}
+%
+% \begin{macro}[internal]{\braid@handle@start}
 % This is the handler in use at the start.
 % It looks for the tokens \Verb+a+ or \Verb+(+ which (might) signal the start of an \Verb+at (coordinate)+ or \Verb+(name)+.
 % If we get anything else (modulo spaces) we decide that we've reached the end of the initialisation stuff and it is time to get started on the braid itself.
@@ -258,7 +251,7 @@ and the derived files            README.txt,
 %    \end{macrocode}
 % \end{macro}
 %
-% \begin{macro}{\braid@handle}
+% \begin{macro}[internal]{\braid@handle}
 % This is the main handler for parsing the braid word.
 % It decides what action to take depending on what the token is.
 % We have to be a bit careful with catcodes, some packages set
@@ -365,7 +358,7 @@ and the derived files            README.txt,
 %    \end{macrocode}
 % \end{macro}
 %
-% \begin{macro}{\braid@maybe@locate}
+% \begin{macro}[internal]{\braid@maybe@locate}
 % If we got an \Verb+a+ token in the \Verb+\braid@handle@start+ then it \emph{might} mean we're looking at \Verb+at (coordinate)+ or it might mean that the user has decided to use \Verb+a+ as the braid parameter.
 % So we examine the next token for a \Verb+t+. 
 %    \begin{macrocode}
@@ -375,7 +368,7 @@ and the derived files            README.txt,
 %    \end{macrocode}
 % \end{macro}
 %
-% \begin{macro}{\braid@@maybe@locate}
+% \begin{macro}[internal]{\braid@@maybe@locate}
 % This is where we test for \Verb+t+ and act appropriately.
 %    \begin{macrocode}
 \def\braid@@maybe@locate{%
@@ -388,7 +381,7 @@ and the derived files            README.txt,
 %    \end{macrocode}
 % \end{macro}
 %
-% \begin{macro}{\braid@find@location}
+% \begin{macro}[internal]{\braid@find@location}
 % This macro starts us looking for a coordinate.
 %    \begin{macrocode}
 \def\braid@find@location{%
@@ -397,7 +390,7 @@ and the derived files            README.txt,
 %    \end{macrocode}
 % \end{macro}
 %
-% \begin{macro}{\braid@@find@location}
+% \begin{macro}[internal]{\braid@@find@location}
 % This is the test for the start of a coordinate.
 % If we get a \Verb+(+ that means we've reached the coordinate.
 % A space means ``carry on''.
@@ -417,7 +410,7 @@ and the derived files            README.txt,
 %    \end{macrocode}
 % \end{macro}
 %
-% \begin{macro}{\braid@location@error}
+% \begin{macro}[internal]{\braid@location@error}
 % This is our error message for not getting a location.
 %    \begin{macrocode}
 \def\braid@location@error{%
@@ -427,7 +420,7 @@ and the derived files            README.txt,
 %    \end{macrocode}
 % \end{macro}
 %
-% \begin{macro}{\braid@locate}
+% \begin{macro}[internal]{\braid@locate}
 % If we reached a \Verb+(+ when looking for a coordinate, everything up to the next \Verb+)+ is that coordinate.
 % Then we parse the coordinate and call the relocation macro.
 %    \begin{macrocode}
@@ -437,7 +430,7 @@ and the derived files            README.txt,
 %    \end{macrocode}
 % \end{macro}
 %
-% \begin{macro}{\braid@relocate}
+% \begin{macro}[internal]{\braid@relocate}
 % This is the macro that actually does the relocation.
 %    \begin{macrocode}
 \def\braid@relocate#1{%
@@ -449,7 +442,7 @@ and the derived files            README.txt,
 %    \end{macrocode}
 % \end{macro}
 %
-% \begin{macro}{\braid@assign@name}
+% \begin{macro}[internal]{\braid@assign@name}
 % This macro saves our name.
 %    \begin{macrocode}
 \def\braid@assign@name#1){%
@@ -459,7 +452,7 @@ and the derived files            README.txt,
 %    \end{macrocode}
 % \end{macro}
 %
-% \begin{macro}{\braid@process@options}
+% \begin{macro}[internal]{\braid@process@options}
 % The intention of this macro is to allow setting of style options mid-braid.
 % (At present, this wouldn't make a lot of sense.)
 %    \begin{macrocode}
@@ -473,35 +466,44 @@ and the derived files            README.txt,
 % The next macros handle the actual braid elements.
 % Everything has to have a subscript, but the superscript is optional and can come before or after the subscript.
 %
-% \begin{macro}{\braid@sup}
+% \begin{macro}[internal]{\braid@sup}
 % This handles braid elements of the form \Verb+a^{-1}_2+.
 %    \begin{macrocode}
-\def\braid@sup#1_#2{\g@addto@macro\braid@label{_{#2}^{#1}}\braid@add@crossing{#2}{#1}}
+\def\braid@sup#1_#2{%
+  \g@addto@macro\braid@label{_{#2}^{#1}}%
+  \braid@add@crossing{#2}{#1}%
+}
 %    \end{macrocode}
 % \end{macro}
 %
-% \begin{macro}{\braid@sub}
+% \begin{macro}[internal]{\braid@sub}
 %    \begin{macrocode}
 % This handles braid elements of the form \Verb+a_1+ or \Verb+a_1^{-1}+.
-\def\braid@sub#1{\@ifnextchar^{\braid@@sub{#1}}{\g@addto@macro\braid@label{_{#1}}\braid@add@crossing{#1}{1}}}
+\def\braid@sub#1{%
+  \@ifnextchar^{\braid@@sub{#1}}%
+  {\g@addto@macro\braid@label{_{#1}}\braid@add@crossing{#1}{1}}%
+}
 %    \end{macrocode}
 % \end{macro}
 %
-% \begin{macro}{\braid@@sub}
+% \begin{macro}[internal]{\braid@@sub}
 % Helper macro for \Verb+\braid@sub+.
 %    \begin{macrocode}
-\def\braid@@sub#1^#2{\g@addto@macro\braid@label{_{#1}^{#2}}\braid@add@crossing{#1}{#2}}
+\def\braid@@sub#1^#2{%
+  \g@addto@macro\braid@label{_{#1}^{#2}}%
+  \braid@add@crossing{#1}{#2}%
+}
 %    \end{macrocode}
 % \end{macro}
 %
-% \begin{macro}{\braid@ne}
+% \begin{macro}[internal]{\braid@ne}
 % Remember what \Verb+1+ looks like for testing against.
 %    \begin{macrocode}
 \def\braid@ne{1}
 %    \end{macrocode}
 % \end{macro}
 %
-% \begin{macro}{\braid@add@crossing}
+% \begin{macro}[internal]{\braid@add@crossing}
 % This is the macro which adds the crossing to the current list of strands.
 % The strands are stored as \emph{soft paths} (see the TikZ/PGF documentation).
 % So this selects the right strands and then extends them according to the crossing type.
@@ -552,7 +554,8 @@ and the derived files            README.txt,
 % Now we try to find a starting point for the strand ending here.
 % We might not have used this strand before, so it might not exist.
 %    \begin{macrocode}
-  \expandafter\let\expandafter\braid@this@path@origin\csname braid@strand@\braid@this@strand @origin\endcsname
+  \expandafter\let\expandafter\braid@this@path@origin%
+  \csname braid@strand@\braid@this@strand @origin\endcsname
 %    \end{macrocode}
 % If we haven't seen this strand before, that one will be \Verb+\relax+.
 %    \begin{macrocode}
@@ -575,19 +578,22 @@ and the derived files            README.txt,
 %    \end{macrocode}
 % We have seen this before, so we simply copy the associated path in to \Verb+\braid@this@path+.
 %    \begin{macrocode}
-  \expandafter\let\expandafter\braid@this@path\csname braid@strand@\braid@this@path@origin\endcsname
+  \expandafter\let\expandafter\braid@this@path%
+  \csname braid@strand@\braid@this@path@origin\endcsname
   \fi
 %    \end{macrocode}
 % Now we do the same again with the other strand in the crossing.
 %    \begin{macrocode}
-  \expandafter\let\expandafter\braid@next@path@origin\csname braid@strand@\braid@next@strand @origin\endcsname
+  \expandafter\let\expandafter\braid@next@path@origin%
+  \csname braid@strand@\braid@next@strand @origin\endcsname
   \ifx\braid@next@path@origin\relax
   \let\braid@next@path@origin\braid@next@strand
   \pgfsyssoftpath@setcurrentpath{\@empty}
   \pgfpathmoveto{\pgfpoint{\braid@nx}{0pt}}
   \pgfsyssoftpath@getcurrentpath{\braid@next@path}
   \else
-  \expandafter\let\expandafter\braid@next@path\csname braid@strand@\braid@next@path@origin\endcsname
+  \expandafter\let\expandafter\braid@next@path%
+  \csname braid@strand@\braid@next@path@origin\endcsname
   \fi
 %    \end{macrocode}
 % Now that we have the paths for our two strands, we extend them to the next level.
@@ -609,13 +615,23 @@ and the derived files            README.txt,
 %    \end{macrocode}
 % We're on the overpass, so just one curve needed.
 %    \begin{macrocode}
-\pgfpathcurveto{\pgfqpoint{\braid@tx}{\braid@cy}}{\pgfqpoint{\braid@nx}{\braid@dy}}{\pgfqpoint{\braid@nx}{\braid@ny}}
+  \pgfpathcurveto{\pgfqpoint{\braid@tx}{\braid@cy}}%
+  {\pgfqpoint{\braid@nx}{\braid@dy}}%
+  {\pgfqpoint{\braid@nx}{\braid@ny}}
 \else
 %    \end{macrocode}
 % We're on the underpass, so we need to interrupt our path to allow the other curve to go past.
 %    \begin{macrocode}
-\pgfpathcurvebetweentimecontinue{0}{\braid@gst}{\pgfqpoint{\braid@tx}{\braid@ty}}{\pgfqpoint{\braid@tx}{\braid@cy}}{\pgfqpoint{\braid@nx}{\braid@dy}}{\pgfqpoint{\braid@nx}{\braid@ny}}
-\pgfpathcurvebetweentime{\braid@gend}{1}{\pgfqpoint{\braid@tx}{\braid@ty}}{\pgfqpoint{\braid@tx}{\braid@cy}}{\pgfqpoint{\braid@nx}{\braid@dy}}{\pgfqpoint{\braid@nx}{\braid@ny}}
+  \pgfpathcurvebetweentimecontinue{0}{\braid@gst}%
+  {\pgfqpoint{\braid@tx}{\braid@ty}}%
+  {\pgfqpoint{\braid@tx}{\braid@cy}}%
+  {\pgfqpoint{\braid@nx}{\braid@dy}}%
+  {\pgfqpoint{\braid@nx}{\braid@ny}}%
+  \pgfpathcurvebetweentime{\braid@gend}{1}%
+  {\pgfqpoint{\braid@tx}{\braid@ty}}%
+  {\pgfqpoint{\braid@tx}{\braid@cy}}%
+  {\pgfqpoint{\braid@nx}{\braid@dy}}%
+  {\pgfqpoint{\braid@nx}{\braid@ny}}
 \fi
 %    \end{macrocode}
 % We're done with this path, so now we save it.
@@ -627,26 +643,45 @@ and the derived files            README.txt,
   \pgfsyssoftpath@setcurrentpath{\braid@next@path}
   \pgfpathlineto{\pgfqpoint{\braid@nx}{\braid@ty}}
 \ifx\braid@crossing@type\braid@over@cross
-\pgfpathcurvebetweentimecontinue{0}{\braid@gst}{\pgfqpoint{\braid@nx}{\braid@ty}}{\pgfqpoint{\braid@nx}{\braid@cy}}{\pgfqpoint{\braid@tx}{\braid@dy}}{\pgfqpoint{\braid@tx}{\braid@ny}}
-\pgfpathcurvebetweentime{\braid@gend}{1}{\pgfqpoint{\braid@nx}{\braid@ty}}{\pgfqpoint{\braid@nx}{\braid@cy}}{\pgfqpoint{\braid@tx}{\braid@dy}}{\pgfqpoint{\braid@tx}{\braid@ny}}
+  \pgfpathcurvebetweentimecontinue{0}{\braid@gst}%
+  {\pgfqpoint{\braid@nx}{\braid@ty}}%
+  {\pgfqpoint{\braid@nx}{\braid@cy}}%
+  {\pgfqpoint{\braid@tx}{\braid@dy}}%
+  {\pgfqpoint{\braid@tx}{\braid@ny}}
+  \pgfpathcurvebetweentime{\braid@gend}{1}%
+  {\pgfqpoint{\braid@nx}{\braid@ty}}%
+  {\pgfqpoint{\braid@nx}{\braid@cy}}%
+  {\pgfqpoint{\braid@tx}{\braid@dy}}%
+  {\pgfqpoint{\braid@tx}{\braid@ny}}
 \else
-  \pgfpathcurveto{\pgfqpoint{\braid@nx}{\braid@cy}}{\pgfqpoint{\braid@tx}{\braid@dy}}{\pgfqpoint{\braid@tx}{\braid@ny}}
+  \pgfpathcurveto{\pgfqpoint{\braid@nx}{\braid@cy}}%
+  {\pgfqpoint{\braid@tx}{\braid@dy}}%
+  {\pgfqpoint{\braid@tx}{\braid@ny}}
 \fi
   \pgfsyssoftpath@getcurrentpath{\braid@next@path}
 %    \end{macrocode}
 % Now save the paths to their proper macros again.
 %    \begin{macrocode}
-  \expandafter\let\csname braid@strand@\braid@this@path@origin \endcsname\braid@this@path
-  \expandafter\let\csname braid@strand@\braid@next@path@origin \endcsname\braid@next@path
+  \expandafter\let%
+  \csname braid@strand@\braid@this@path@origin \endcsname%
+  \braid@this@path
+  \expandafter\let%
+  \csname braid@strand@\braid@next@path@origin \endcsname%
+  \braid@next@path
 %    \end{macrocode}
 % Now update the origins
 %    \begin{macrocode}
-  \expandafter\let\csname braid@strand@\braid@this@strand @origin\endcsname\braid@next@path@origin
-  \expandafter\let\csname braid@strand@\braid@next@strand @origin\endcsname\braid@this@path@origin
+  \expandafter\let%
+  \csname braid@strand@\braid@this@strand @origin\endcsname%
+  \braid@next@path@origin
+  \expandafter\let%
+  \csname braid@strand@\braid@next@strand @origin\endcsname%
+  \braid@this@path@origin
 %    \end{macrocode}
 % increment the strand counter, if necessary
 %    \begin{macrocode}
-  \pgfmathparse{\value{braid@strands} < \braid@next@strand ? "\noexpand\setcounter{braid@strands}{\braid@next@strand}" : ""}
+  \pgfmathparse{\value{braid@strands} < \braid@next@strand ?
+    "\noexpand\setcounter{braid@strands}{\braid@next@strand}" : ""}
   \pgfmathresult
 %    \end{macrocode}
 % And merrily go on our way with the next bit of the braid specification.
@@ -656,7 +691,7 @@ and the derived files            README.txt,
 %    \end{macrocode}
 % \end{macro}
 %
-% \begin{macro}{\braid@olabel@strand}
+% \begin{macro}[internal]{\braid@olabel@strand}
 % This macro allows us to label a strand just before a crossing.
 % The first argument is the strand number at that particular crossing and the second is the label.
 % We also save the current height.
@@ -677,7 +712,7 @@ and the derived files            README.txt,
 %    \end{macrocode}
 % \end{macro}
 %
-% \begin{macro}{\braid@clabel@strand}
+% \begin{macro}[internal]{\braid@clabel@strand}
 % This macro allows us to label a strand just before a crossing.
 % The first argument is the strand number at that particular crossing and the second is the label.
 % We also save the current height.
@@ -692,7 +727,7 @@ and the derived files            README.txt,
 %    \end{macrocode}
 % \end{macro}
 %
-% \begin{macro}{\braid@floors@trim}
+% \begin{macro}[internal]{\braid@floors@trim}
 % The list of floors, if given, will start with a superfluous comma.
 % This removes it.
 %    \begin{macrocode}
@@ -700,7 +735,7 @@ and the derived files            README.txt,
 %    \end{macrocode}
 % \end{macro}
 %
-% \begin{macro}{\braid@render@floor}
+% \begin{macro}[internal]{\braid@render@floor}
 % This is the default rendering for floors: it draws a rectangle.
 %    \begin{macrocode}
 \def\braid@render@floor{%
@@ -709,7 +744,7 @@ and the derived files            README.txt,
 %    \end{macrocode}
 % \end{macro}
 %
-% \begin{macro}{\braid@render@strand@labels}
+% \begin{macro}[internal]{\braid@render@strand@labels}
 % This starts rendering the labels on the strands at the crossings.
 %    \begin{macrocode}
 \def\braid@render@strand@labels#1{%
@@ -724,7 +759,7 @@ and the derived files            README.txt,
 %    \end{macrocode}
 % \end{macro}
 %
-% \begin{macro}{\braid@@render@strand@labels}
+% \begin{macro}[internal]{\braid@@render@strand@labels}
 % This is the actual renderer.
 %    \begin{macrocode}
 \def\braid@@render@strand@labels#1#2#3#4{%
@@ -805,7 +840,7 @@ and the derived files            README.txt,
 %    \end{macrocode}
 % \end{macro}
 %
-% \begin{macro}{\braid@render}
+% \begin{macro}[internal]{\braid@render}
 % This is called at the end of the braid and it renders the braids and floors according to whatever has been built up up to now.
 %    \begin{macrocode}
 \def\braid@render{
@@ -866,7 +901,8 @@ and the derived files            README.txt,
 %    \end{macrocode}
 % Load the relevant floor style, if it exists.
 %    \begin{macrocode}
-    \expandafter\let\expandafter\braid@floor@style\csname braid@options@floor@\braid@ff\endcsname
+    \expandafter\let\expandafter\braid@floor@style%
+    \csname braid@options@floor@\braid@ff\endcsname
     \ifx\braid@floor@style\relax
     \else
 %    \end{macrocode}
@@ -917,7 +953,8 @@ and the derived files            README.txt,
 %    \end{macrocode}
 % Try to find the starting point of this strand
 %    \begin{macrocode}
-    \expandafter\let\expandafter\braid@path@origin\csname braid@strand@\braid@k @origin\endcsname
+    \expandafter\let\expandafter\braid@path@origin%
+    \csname braid@strand@\braid@k @origin\endcsname
     \ifx\braid@path@origin\relax
 %    \end{macrocode}
 % If that doesn't exist, we'll just draw a straight line
@@ -930,7 +967,8 @@ and the derived files            README.txt,
 %    \end{macrocode}
 % If the path does exist, we load it
 %    \begin{macrocode}
-    \expandafter\let\expandafter\braid@path\csname braid@strand@\braid@path@origin\endcsname
+    \expandafter\let\expandafter\braid@path%
+    \csname braid@strand@\braid@path@origin\endcsname
     \pgfsyssoftpath@setcurrentpath{\braid@path}
     \fi
 %    \end{macrocode}
@@ -944,7 +982,8 @@ and the derived files            README.txt,
 %    \end{macrocode}
 % Load any style options specific to this strand
 %    \begin{macrocode}
-    \expandafter\let\expandafter\braid@style\csname braid@options@strand@\braid@path@origin\endcsname
+    \expandafter\let\expandafter\braid@style%
+    \csname braid@options@strand@\braid@path@origin\endcsname
     \ifx\braid@style\relax
     \else
     \expandafter\tikzset\expandafter{\braid@style}
@@ -1006,7 +1045,7 @@ and the derived files            README.txt,
 %    \end{macrocode}
 % \end{macro}
 %
-% \begin{macro}{\braid@start}
+% \begin{macro}[internal]{\braid@start}
 % This starts off the braid, initialising a load of stuff.
 % We start a PGF scope, set the level to \(-1\), the label, floors, and name to empty, process any options we're given, and save certain lengths for later use..
 %    \begin{macrocode}
@@ -1027,7 +1066,8 @@ and the derived files            README.txt,
   \fi
   \let\braid@options\tikz@options
   \tikz@transform
-  \setcounter{braid@strands}{\pgfkeysvalueof{/pgf/braid/number of           strands}}%
+  \setcounter{braid@strands}{%
+    \pgfkeysvalueof{/pgf/braid/number of strands}}%
   \braid@width=\pgfkeysvalueof{/pgf/braid/width}%
   \braid@height=\pgfkeysvalueof{/pgf/braid/height}%
   \braid@eh=\pgfkeysvalueof{/pgf/braid/border height}%
@@ -1110,14 +1150,16 @@ and the derived files            README.txt,
       \braidset{style each strand/.list={#1}}%
     },
     style each strand/.code={%
-      \expandafter\edef\csname braid@options@strand@#1\endcsname{\braid@temp}%
+      \expandafter\edef%
+      \csname braid@options@strand@#1\endcsname{\braid@temp}%
     },
     style floors/.code 2 args={%
       \def\braid@temp{#2}%
       \braidset{style each floor/.list={#1}}%
     },
     style each floor/.code={%
-      \expandafter\edef\csname braid@options@floor@#1\endcsname{\braid@temp}%
+      \expandafter\edef%
+      \csname braid@options@floor@#1\endcsname{\braid@temp}%
     },
     style all floors/.code={%
       \def\braid@floors@style{#1}
@@ -1146,14 +1188,18 @@ and the derived files            README.txt,
 %
 % Life is so much easier with \LaTeX3.
 %    \begin{macrocode}
-\ProvidesFile{tikzlibrarybraids.code.tex}[v2.0]
+\ProvidesFile{tikzlibrarybraids.code.tex}[%
+  2019/03/20 v2.0 Tikz/PGF library for drawing braid diagrams%
+]
 \RequirePackage{expl3}
 \ExplSyntaxOn
+%    \end{macrocode}
+% Define all the variables we'll be using.
+%    \begin{macrocode}
 \tl_new:N \l_@@_tmpa_tl
 \tl_new:N \l_@@_tmpb_tl
 \tl_new:N \l_@@_tmpc_tl
 \tl_new:N \l_@@_tmpd_tl
-\tl_new:N \l_@@_coordinates_tl
 \fp_new:N \l_@@_height_fp
 \fp_new:N \l_@@_nudge_fp
 \fp_new:N \l_@@_control_fp
@@ -1182,13 +1228,13 @@ and the derived files            README.txt,
 \str_set:Nn \l_@@_one_str {1}
 \bool_new:N \l_@@_step_level_bool
 \bool_new:N \l_@@_swap_crossing_bool
-\bool_new:N \l_@@_fence_bool
+\bool_new:N \l_@@_floor_bool
 \prop_new:N \l_@@_strands_prop
 \prop_new:N \l_@@_permutation_prop
 \prop_new:N \l_@@_crossing_permutation_prop
 \prop_new:N \l_@@_inverse_prop
 %    \end{macrocode}
-%
+% Our interface is through a TikZ pic.
 %    \begin{macrocode}
 \tikzset{
    braid/.pic={
@@ -1198,19 +1244,46 @@ and the derived files            README.txt,
        \@@_render:
      }
    },
+   /tikz/braid/.search~ also={/tikz},
    braid/.cd,
+%    \end{macrocode}
+% The various TikZ parameters for the braid.
+%
+% \Verb+number of strands+ sets a minimum for the number of strands in the braid (otherwise, it is set by the strands used in the specified crossings).
+%    \begin{macrocode}
    number~ of~ strands/.initial=0,
+%    \end{macrocode}
+% \Verb+height+ is the distance between crossings (can be negative).
+%    \begin{macrocode}
    height/.initial=-1cm,
+%    \end{macrocode}
+% \Verb+width+ is the distance between strands (can be negative).
+%    \begin{macrocode}
    width/.initial=1cm,
+%    \end{macrocode}
+% \Verb+gap+ is for determining the gap in the under-strand of a crossing.
+%    \begin{macrocode}
    gap/.initial=.05,
+%    \end{macrocode}
+% \Verb+border height+ is a length added at the start and end of each strand.
+%    \begin{macrocode}
    border~ height/.initial=.25cm,
-   fence~ border/.initial=.25cm,
+%    \end{macrocode}
+% \Verb+floor border+ is added to the width of any floors
+%    \begin{macrocode}
+   floor~ border/.initial=.25cm,
+%    \end{macrocode}
+% \Verb+control factor+ determines the proportion of the \Verb+height+ used for the control points.
+%    \begin{macrocode}
    control~ factor/.initial=.5,
+%    \end{macrocode}
+% \Verb+nudge factor+ is used to compress each crossing slightly within its rectangle.
+%    \begin{macrocode}
    nudge~ factor/.initial=.05
 }
 %    \end{macrocode}
 %
-% \begin[internal]{macro}{\@@_parse_word:Nn}
+% \begin{macro}[internal]{\@@_parse_word:Nn}
 % Parse the braid word as a token list and convert it into a sequence.
 %    \begin{macrocode}
 \cs_new_nopar:Npn \@@_parse_word:n #1
@@ -1221,20 +1294,45 @@ and the derived files            README.txt,
 
   \bool_until_do:nn { \tl_if_empty_p:N \l_@@_tmpb_tl }
   {
+%    \end{macrocode}
+% We step through the braid specification, looking for special characters.
+% To avoid catcode issues, the comparison is as strings.    
+% Some actions may involve consuming more tokens from the list so we can't do a simple \Verb+map_inline+ but have to keep stripping off the head token.
+%
+% The idea is to store information about the current crossing in a token list (noting that it may be specified in a variety of orders) and then when we're sure we have all the information we add it to our sequence of crossings.    
+%    \begin{macrocode}
     \str_set:Nx \l_@@_tmpa_str {\tl_head:N \l_@@_tmpb_tl}
     \tl_set:Nx \l_@@_tmpb_tl {\tl_tail:N \l_@@_tmpb_tl}
+%    \end{macrocode}
+%
+%    \begin{macrocode}
     \str_case_e:nnTF {\l_@@_tmpa_str}
     {
+%    \end{macrocode}
+% Underscore introduces the crossing numbers
+%    \begin{macrocode}
       {_}
      {
-       \tl_put_right:Nx \l_@@_tmpa_tl {\exp_not:N \@@_parse_index:n {\tl_head:N \l_@@_tmpb_tl}}
+       \tl_put_right:Nx \l_@@_tmpa_tl
+       {
+         \exp_not:N \@@_parse_index:n {\tl_head:N \l_@@_tmpb_tl}
+       }
        \tl_set:Nx \l_@@_tmpb_tl {\tl_tail:N \l_@@_tmpb_tl}
      }
+%    \end{macrocode}
+% Power is used to indicate inverse.
+%    \begin{macrocode}
      {^}
      {
-       \tl_put_left:Nx \l_@@_tmpa_tl {\exp_not:N \@@_parse_exponent:n {\tl_head:N \l_@@_tmpb_tl}}
+       \tl_put_left:Nx \l_@@_tmpa_tl
+       {
+         \exp_not:N \@@_parse_exponent:n {\tl_head:N \l_@@_tmpb_tl}
+       }
        \tl_set:Nx \l_@@_tmpb_tl {\tl_tail:N \l_@@_tmpb_tl}
      }
+%    \end{macrocode}
+% Bar is for floors.
+%    \begin{macrocode}
      {|}
      {
       \tl_if_empty:NF \l_@@_tmpa_tl
@@ -1242,12 +1340,26 @@ and the derived files            README.txt,
         \seq_put_right:NV \l_@@_word_seq \l_@@_tmpa_tl
         \tl_clear:N \l_@@_tmpa_tl
       }
-      \seq_put_right:Nn \l_@@_word_seq {\bool_set_true:N \l_@@_fence_bool \bool_set_false:N \l_@@_step_level_bool }
+      \seq_put_right:Nn \l_@@_word_seq
+      {
+        \bool_set_true:N \l_@@_floor_bool
+        \bool_set_false:N \l_@@_step_level_bool
+      }
      }
+%    \end{macrocode}
+% Hyphen says the next crossing is on the same level as the current one.
+%    \begin{macrocode}
      {-}
      {
-       \tl_put_right:Nn \l_@@_tmpa_tl {\bool_set_false:N \l_@@_step_level_bool}
+       \tl_put_right:Nn \l_@@_tmpa_tl
+       {
+         \bool_set_false:N \l_@@_step_level_bool
+       }
      }
+%    \end{macrocode}
+% \(1\) is for the identity (i.e., no crossing but still have a level).
+% We put a nop token on the list so that it is no longer empty.     
+%    \begin{macrocode}
      {1}
      {
       \tl_if_empty:NF \l_@@_tmpa_tl
@@ -1257,6 +1369,9 @@ and the derived files            README.txt,
       }
        \tl_put_right:Nn \l_@@_tmpa_tl {\@@_do_identity:}
      }
+%    \end{macrocode}
+% Ignore spaces.
+%    \begin{macrocode}
      {~}
      {
      }
@@ -1264,6 +1379,9 @@ and the derived files            README.txt,
     {
     }
     {
+%    \end{macrocode}
+% If we get an unrecognised token, it's our trigger to start accumulating information for the next crossing.
+%    \begin{macrocode}
       \tl_if_empty:NF \l_@@_tmpa_tl
       {
         \seq_put_right:NV \l_@@_word_seq \l_@@_tmpa_tl
@@ -1271,6 +1389,9 @@ and the derived files            README.txt,
       }
     }
   }
+%    \end{macrocode}
+% At the end, we also put our current token list on the word sequence.
+%    \begin{macrocode}
   \tl_if_empty:NF \l_@@_tmpa_tl
   {
     \seq_put_right:NV \l_@@_word_seq \l_@@_tmpa_tl
@@ -1300,7 +1421,7 @@ and the derived files            README.txt,
 % \end{macro}
 %
 % \begin{macro}{\@@_parse_exponent:n}
-% Parse an exponent.
+% Parse an exponent, basically testing to see if it is \(-1\) in which case our crossing numbers should be reversed..
 %    \begin{macrocode}
 \cs_new_nopar:Npn \@@_parse_exponent:n #1
 {
@@ -1315,15 +1436,6 @@ and the derived files            README.txt,
 %    \end{macrocode}
 % \end{macro}
 %
-% \begin{macro}{\@@_do_nothing:}
-%    \begin{macrocode}
-\cs_new_nopar:Npn \@@_do_nothing:
-{
-  \bool_set_false:N \l_@@_step_level_bool
-}
-%    \end{macrocode}
-% \end{macro}
-%
 % \begin{macro}{\@@_do_identity:}
 %    \begin{macrocode}
 \cs_new_nopar:Npn \@@_do_identity:
@@ -1333,48 +1445,94 @@ and the derived files            README.txt,
 % \end{macro}
 %
 % \begin{macro}{\@@_count:NNN}
-% Work out how big the braid is.
+% Work out how big the braid is by counting strands and levels.
+% We also figure out the permutation from the start to end of the strands.
+% This is useful for labelling various parts of the braid.
 %    \begin{macrocode}
 \cs_new_nopar:Npn \@@_count:
 {
   \int_zero:N \l_@@_length_int
-  \int_set:Nn \l_@@_strands_int {\pgfkeysvalueof{/tikz/braid/number~of~strands}}
+  \int_set:Nn \l_@@_strands_int {\@@_value:n {number~of~strands}}
   \prop_clear:N \l_@@_permutation_prop
   \prop_clear:N \l_@@_crossing_permutation_prop
   \prop_clear:N \l_@@_inverse_prop
   
   \seq_map_inline:Nn \l_@@_word_seq
   {
+%    \end{macrocode}
+% Clear the crossing sequence and assume we're going to step the level.
+%    \begin{macrocode}
     \seq_clear:N \l_@@_crossing_seq
     \bool_set_true:N \l_@@_step_level_bool
+%    \end{macrocode}
+% Run the details of this crossing.
+%    \begin{macrocode}
     ##1
+%    \end{macrocode}
+% If we're increasing the level (no hyphen), do so.
+%    \begin{macrocode}
     \bool_if:NT \l_@@_step_level_bool
     {
       \int_incr:N \l_@@_length_int
     }
+%    \end{macrocode}    
+% If we have a crossing, check we have enough strands to cover it.
+%    \begin{macrocode}
     \seq_if_empty:NF \l_@@_crossing_seq
     {
-      \int_set:Nn \l_@@_strands_int {\int_max:nn {\int_max:nn {\l_@@_strands_int}{ \seq_item:Nn \l_@@_crossing_seq {1}}} { \seq_item:Nn \l_@@_crossing_seq {2}}}
+      \int_set:Nn \l_@@_strands_int
+      {
+        \int_max:nn
+        {
+          \int_max:nn {\l_@@_strands_int}
+          { \seq_item:Nn \l_@@_crossing_seq {1}}
+        }
+        {
+          \seq_item:Nn \l_@@_crossing_seq {2}
+        }
+      }
     }
   }
+%    \end{macrocode}
+% Now that we know how many strands we have, we can initialise our permutation props.
+% One will hold the overall permutation, the other will keep track of our current permutation.
+%    \begin{macrocode}
   \int_step_inline:nnnn {1} {1} {\l_@@_strands_int}
   {
     \prop_put:Nnn \l_@@_permutation_prop {##1} {##1}
     \prop_put:Nnn \l_@@_crossing_permutation_prop {##1} {##1}
   }
+%    \end{macrocode}
+% Now we step through the braid word again and record the permutations so that we can calculate the overall permutation defined by the braid.
+%    \begin{macrocode}
   \seq_map_inline:Nn \l_@@_word_seq
   {
     \seq_clear:N \l_@@_crossing_seq
     ##1
     \seq_if_empty:NF \l_@@_crossing_seq
     {
-      \prop_get:NxN \l_@@_permutation_prop {\seq_item:Nn \l_@@_crossing_seq {1}} \l_@@_tmpa_tl
-      \prop_get:NxN \l_@@_permutation_prop {\seq_item:Nn \l_@@_crossing_seq {2}} \l_@@_tmpb_tl
+      \prop_get:NxN \l_@@_permutation_prop
+      {
+        \seq_item:Nn \l_@@_crossing_seq {1}
+      } \l_@@_tmpa_tl
+      \prop_get:NxN \l_@@_permutation_prop
+      {
+        \seq_item:Nn \l_@@_crossing_seq {2}
+      } \l_@@_tmpb_tl
 
-      \prop_put:NxV \l_@@_permutation_prop {\seq_item:Nn \l_@@_crossing_seq {2}} \l_@@_tmpa_tl
-      \prop_put:NxV \l_@@_permutation_prop {\seq_item:Nn \l_@@_crossing_seq {1}} \l_@@_tmpb_tl
+      \prop_put:NxV \l_@@_permutation_prop
+      {
+        \seq_item:Nn \l_@@_crossing_seq {2}
+      } \l_@@_tmpa_tl
+      \prop_put:NxV \l_@@_permutation_prop
+      {
+        \seq_item:Nn \l_@@_crossing_seq {1}
+      } \l_@@_tmpb_tl
     }
   }
+%    \end{macrocode}
+% This inverts the permutation.
+%    \begin{macrocode}
   \int_step_inline:nnnn {1} {1} {\l_@@_strands_int}
   {
     \prop_get:NnN \l_@@_permutation_prop {##1} \l_@@_tmpa_tl
@@ -1386,6 +1544,7 @@ and the derived files            README.txt,
 %
 %
 % \begin{macro}{\@@_dim_value:n, \@@_value:n}
+% Extract a length or a value from a PGF key.
 %    \begin{macrocode}
 \cs_new_nopar:Npn \@@_dim_value:n #1
 {
@@ -1399,80 +1558,156 @@ and the derived files            README.txt,
 % \end{macro}
 %
 % \begin{macro}{\@@_render:}
+% This is the macro that converts the braid word into TikZ paths.
 %    \begin{macrocode}
 \cs_generate_variant:Nn \prop_get:NnN {NxN}
 \cs_generate_variant:Nn \prop_put:Nnn {NxV}
 
 \cs_new_nopar:Npn \@@_render:
 {
+%    \end{macrocode}
+% Initialise a prop for the individual strands.
+%    \begin{macrocode}
   \prop_clear:N \l_@@_strands_prop
-  \tl_clear:N \l_@@_coordinates_tl
-  \tl_set:Nn \l_@@_coordinates_tl {\path}
-  
+%    \end{macrocode}  
+% Initialise some lengths.
+%    \begin{macrocode}
   \fp_zero:N \l_@@_height_fp
   \fp_zero:N \l_@@_nudge_fp
   \fp_zero:N \l_@@_control_fp
-  
-  \fp_set:Nn \l_@@_height_fp {sign(\@@_dim_value:n {height}) * \@@_dim_value:n {border~ height}}
-  \fp_set:Nn \l_@@_nudge_fp {\@@_value:n {nudge~ factor} * \@@_dim_value:n {height}}
-  \fp_set:Nn \l_@@_control_fp {\@@_value:n {control~ factor} * \@@_dim_value:n {height}}
+%    \end{macrocode}  
+% This holds our current \Verb+height+ of our strands.
+%    \begin{macrocode}
+  \fp_set:Nn \l_@@_height_fp
+  {
+    sign(\@@_dim_value:n {height})
+    * \@@_dim_value:n {border~ height}
+  }
+%    \end{macrocode}
+% Each crossing actually starts a little bit into the crossing space, as defined by the \Verb+nudge factor+.
+%    \begin{macrocode}
+  \fp_set:Nn \l_@@_nudge_fp
+  {
+    \@@_value:n {nudge~ factor} * \@@_dim_value:n {height}
+  }
+%    \end{macrocode}
+% This sets where the control points for the crossing curves will be. 
+%    \begin{macrocode}
+  \fp_set:Nn \l_@@_control_fp
+  {
+    \@@_value:n {control~ factor} * \@@_dim_value:n {height}
+  }
   \fp_sub:Nn \l_@@_control_fp {\l_@@_nudge_fp}
-  
+%    \end{macrocode}
+% Initialise our strand paths with a \Verb+\draw+.
+%    \begin{macrocode}
   \int_step_inline:nnnn {1} {1} {\l_@@_strands_int}
   {
     \prop_get:NnN \l_@@_inverse_prop {##1} \l_@@_tmpa_tl
     \prop_put:Nnx \l_@@_strands_prop {##1}
     {
-      \exp_not:N \draw[braid/strand~ ##1/.try]
-      \exp_not:N \@@_moveto:nn {\fp_eval:n {(##1 - 1) * \@@_dim_value:n {width} }} {0}
-      \exp_not:N \@@_lineto:nn  {\fp_eval:n {(##1 - 1) * \@@_dim_value:n {width} }} { \fp_to_decimal:N \l_@@_height_fp} 
+      \exp_not:N \draw[
+        braid/every~ strand/.try,
+        braid/strand~ ##1/.try
+      ]
+      \exp_not:N \@@_moveto:nn {
+        \fp_eval:n {(##1 - 1) * \@@_dim_value:n {width} }
+      } {0}
+      \exp_not:N \@@_lineto:nn  {
+        \fp_eval:n {(##1 - 1) * \@@_dim_value:n {width} }
+      } { \fp_to_decimal:N \l_@@_height_fp} 
     }
+%    \end{macrocode}
+% Add a load of coordinates at the start of each strand, indexed by both forward and backward strand numbers.
+%    \begin{macrocode}
+    \@@_coordinate:xxxx {-##1-s} {-rev-\l_@@_tmpa_tl-s}
+    {\fp_eval:n {(##1 - 1) * \@@_dim_value:n {width} }} {0}
 
-    \tl_put_right:Nx \l_@@_coordinates_tl
-    {
-      \exp_not:N \@@_coordinate:nnn {-##1-s} {\fp_eval:n {(##1 - 1) * \@@_dim_value:n {width} }} {0}
-      \exp_not:N \@@_coordinate:nnn {-\l_@@_tmpa_tl-rev-e} {\fp_eval:n {(##1 - 1) * \@@_dim_value:n {width} }} {0}
-      \exp_not:N \@@_coordinate:nnn {-##1-0} {\fp_eval:n {(##1 - 1) * \@@_dim_value:n {width} }} { \fp_to_decimal:N \l_@@_height_fp} 
-      \exp_not:N \@@_coordinate:nnn {-\l_@@_tmpa_tl-rev-\int_use:N \l_@@_length_int} {\fp_eval:n {(##1 - 1) * \@@_dim_value:n {width} }} { \fp_to_decimal:N \l_@@_height_fp} 
-    }
+    \@@_coordinate:xxxx {-##1-0} {-rev-\l_@@_tmpa_tl-0}
+    {\fp_eval:n {(##1 - 1) * \@@_dim_value:n {width} }}
+    { \fp_to_decimal:N \l_@@_height_fp} 
   }
-
+%    \end{macrocode}
+% Keep track of the crossing level for the floor.
+%    \begin{macrocode}
   \int_zero:N \l_@@_crossing_int
   \int_incr:N \l_@@_crossing_int
 
   \seq_map_inline:Nn \l_@@_word_seq
   {
+%    \end{macrocode}
+% Clear the flags for this segment of the braid word
+%    \begin{macrocode}
     \seq_clear:N \l_@@_crossing_seq
     \bool_set_true:N \l_@@_step_level_bool
-    \bool_set_false:N \l_@@_fence_bool
+    \bool_set_false:N \l_@@_floor_bool
     ##1
-    \bool_if:NT \l_@@_fence_bool
+%    \end{macrocode}
+% If we're drawing a floor, do so straightaway.
+%    \begin{macrocode}
+    \bool_if:NT \l_@@_floor_bool
     {
-      \@@_do_fence:Vxxxx \l_@@_crossing_int
-      {\fp_eval:n { -1*sign(\@@_dim_value:n{width}) * \@@_dim_value:n {fence~ border}} pt }
+      \@@_do_floor:Vxxxx \l_@@_crossing_int
+      {\fp_eval:n
+        {
+          -1*sign(\@@_dim_value:n{width})
+          * \@@_dim_value:n {floor~ border}
+        }
+        pt
+      }
       {\fp_to_decimal:N \l_@@_height_fp pt}
-      {\fp_eval:n { (\l_@@_strands_int - 1) * \@@_dim_value:n {width} + sign(\@@_dim_value:n{width}) * \@@_dim_value:n {fence~ border} } pt }
-      {\fp_eval:n { \l_@@_height_fp + \@@_dim_value:n {height} } pt }
+      {\fp_eval:n
+        {
+          (\l_@@_strands_int - 1) * \@@_dim_value:n {width}
+          + sign(\@@_dim_value:n{width})
+          * \@@_dim_value:n {floor~ border}
+        }
+        pt
+      }
+      {\fp_eval:n {
+          \l_@@_height_fp
+          + \@@_dim_value:n {height}
+        }
+        pt
+      }
     }
-
+%    \end{macrocode}
+% If we have a crossing, process it.
+%    \begin{macrocode}
     \seq_if_empty:NF \l_@@_crossing_seq
     {
-      
-      \prop_get:NxN \l_@@_crossing_permutation_prop {\seq_item:Nn \l_@@_crossing_seq {1}} \l_@@_tmpa_tl
-      \prop_get:NxN \l_@@_crossing_permutation_prop {\seq_item:Nn \l_@@_crossing_seq {2}} \l_@@_tmpb_tl
+%    \end{macrocode}
+% Keep track of the current permutation.      
+%    \begin{macrocode}
+      \prop_get:NxN \l_@@_crossing_permutation_prop
+      {\seq_item:Nn \l_@@_crossing_seq {1}} \l_@@_tmpa_tl
+      \prop_get:NxN \l_@@_crossing_permutation_prop
+      {\seq_item:Nn \l_@@_crossing_seq {2}} \l_@@_tmpb_tl
 
-      \prop_put:NxV \l_@@_crossing_permutation_prop {\seq_item:Nn \l_@@_crossing_seq {2}} \l_@@_tmpa_tl
-      \prop_put:NxV \l_@@_crossing_permutation_prop {\seq_item:Nn \l_@@_crossing_seq {1}} \l_@@_tmpb_tl
-
-
-      \prop_get:NxN \l_@@_strands_prop {\seq_item:Nn \l_@@_crossing_seq {1}} \l_@@_tmpa_tl
-      \prop_get:NxN \l_@@_strands_prop {\seq_item:Nn \l_@@_crossing_seq {2}} \l_@@_tmpb_tl
-
+      \prop_put:NxV \l_@@_crossing_permutation_prop
+      {\seq_item:Nn \l_@@_crossing_seq {2}} \l_@@_tmpa_tl
+      \prop_put:NxV \l_@@_crossing_permutation_prop
+      {\seq_item:Nn \l_@@_crossing_seq {1}} \l_@@_tmpb_tl
+%    \end{macrocode}
+% Now get the strands corresponding to the ones involved in the crossing.
+%    \begin{macrocode}
+      \prop_get:NxN \l_@@_strands_prop
+      {\seq_item:Nn \l_@@_crossing_seq {1}} \l_@@_tmpa_tl
+      \prop_get:NxN \l_@@_strands_prop
+      {\seq_item:Nn \l_@@_crossing_seq {2}} \l_@@_tmpb_tl
+%    \end{macrocode}
+% The over-strand is easy as that's a single curve.
+%    \begin{macrocode}
       \tl_put_right:Nx \l_@@_tmpa_tl
       {
         \exp_not:N \@@_lineto:nn
       
-        {\fp_eval:n {(\seq_item:Nn \l_@@_crossing_seq {1} - 1) * \@@_dim_value:n {width} }}
+        {\fp_eval:n
+          {
+            (\seq_item:Nn \l_@@_crossing_seq {1} - 1)
+            * \@@_dim_value:n {width}
+          }
+        }
         {\fp_eval:n { \l_@@_height_fp + \l_@@_nudge_fp } }
 
         \exp_not:N \@@_curveto:nnnnnn
@@ -1483,21 +1718,43 @@ and the derived files            README.txt,
         {0}
         {\fp_eval:n {- \l_@@_control_fp}}
 
-        {\fp_eval:n {(\seq_item:Nn \l_@@_crossing_seq {2} - 1) * \@@_dim_value:n {width} }}
-        {\fp_eval:n { \l_@@_height_fp + \@@_dim_value:n {height} - \l_@@_nudge_fp }}
+        {\fp_eval:n
+          {
+            (\seq_item:Nn \l_@@_crossing_seq {2} - 1)
+            * \@@_dim_value:n {width}
+          }
+        }
+        {\fp_eval:n
+          {
+            \l_@@_height_fp
+            + \@@_dim_value:n {height}
+            - \l_@@_nudge_fp
+          }
+        }
       }
-
+%    \end{macrocode}
+% The under-strand is a bit more complicated as we need to break it in the middle.
+%    \begin{macrocode}
       \tl_put_right:Nx \l_@@_tmpb_tl
       {
         \exp_not:N \@@_lineto:nn
       
-        {\fp_eval:n {(\seq_item:Nn \l_@@_crossing_seq {2} - 1) * \@@_dim_value:n {width} }}
+        {\fp_eval:n
+          {
+            (\seq_item:Nn \l_@@_crossing_seq {2} - 1)
+            * \@@_dim_value:n {width}
+          }
+        }
         {\fp_eval:n { \l_@@_height_fp + \l_@@_nudge_fp } }
 
         \exp_not:N \@@_curveto:nnnnnn
 
         {0}
-        { \fp_eval:n { \l_@@_control_fp  * (.5 - \@@_value:n {gap} ) } }
+        {
+          \fp_eval:n {
+            \l_@@_control_fp  * (.5 - \@@_value:n {gap} )
+          }
+        }
 
         {
           \fp_eval:n {
@@ -1506,8 +1763,16 @@ and the derived files            README.txt,
             {.5 - \@@_value:n {gap} }
             {0}
             {0}
-            { (\seq_item:Nn \l_@@_crossing_seq {1} - \seq_item:Nn \l_@@_crossing_seq {2}) * \@@_dim_value:n {width} }
-            { (\seq_item:Nn \l_@@_crossing_seq {1} - \seq_item:Nn \l_@@_crossing_seq {2}) * \@@_dim_value:n {width} }
+            {
+              (\seq_item:Nn \l_@@_crossing_seq {1}
+              - \seq_item:Nn \l_@@_crossing_seq {2})
+              * \@@_dim_value:n {width}
+            }
+            {
+              (\seq_item:Nn \l_@@_crossing_seq {1}
+              - \seq_item:Nn \l_@@_crossing_seq {2})
+              * \@@_dim_value:n {width}
+            }
           }
         }
         {
@@ -1517,20 +1782,33 @@ and the derived files            README.txt,
             {.5 - \@@_value:n {gap} }
             {0}
             {\l_@@_control_fp}
-            {\@@_dim_value:n {height} - 2* \l_@@_nudge_fp - \l_@@_control_fp}
+            {
+              \@@_dim_value:n {height}
+              - 2* \l_@@_nudge_fp
+              - \l_@@_control_fp
+            }
             {\@@_dim_value:n {height} - 2* \l_@@_nudge_fp}
           }
         }
 
         {
           \fp_eval:n {
-            (\seq_item:Nn \l_@@_crossing_seq {2} - 1) * \@@_dim_value:n {width} +
+            (\seq_item:Nn \l_@@_crossing_seq {2} - 1)
+            * \@@_dim_value:n {width} +
             \@@_bezier_point:nnnnn
             {.5 - \@@_value:n {gap} }
             {0}
             {0}
-            { (\seq_item:Nn \l_@@_crossing_seq {1} - \seq_item:Nn \l_@@_crossing_seq {2}) * \@@_dim_value:n {width} }
-            { (\seq_item:Nn \l_@@_crossing_seq {1} - \seq_item:Nn \l_@@_crossing_seq {2}) * \@@_dim_value:n {width} }
+            {
+              (\seq_item:Nn \l_@@_crossing_seq {1}
+              - \seq_item:Nn \l_@@_crossing_seq {2})
+              * \@@_dim_value:n {width}
+            }
+            {
+              (\seq_item:Nn \l_@@_crossing_seq {1}
+              - \seq_item:Nn \l_@@_crossing_seq {2})
+              * \@@_dim_value:n {width}
+            }
           }
         }
         {
@@ -1540,7 +1818,11 @@ and the derived files            README.txt,
             {.5 - \@@_value:n {gap} }
             {0}
             {\l_@@_control_fp}
-            {\@@_dim_value:n {height} - 2* \l_@@_nudge_fp - \l_@@_control_fp}
+            {
+              \@@_dim_value:n {height}
+              - 2* \l_@@_nudge_fp
+              - \l_@@_control_fp
+            }
             {\@@_dim_value:n {height} - 2* \l_@@_nudge_fp}
           }
         }
@@ -1548,13 +1830,22 @@ and the derived files            README.txt,
         \exp_not:N \@@_moveto:nn
         {
           \fp_eval:n {
-            (\seq_item:Nn \l_@@_crossing_seq {2} - 1) * \@@_dim_value:n {width} +
+            (\seq_item:Nn \l_@@_crossing_seq {2} - 1)
+            * \@@_dim_value:n {width} +
             \@@_bezier_point:nnnnn
             {.5 + \@@_value:n {gap} }
             {0}
             {0}
-            { (\seq_item:Nn \l_@@_crossing_seq {1} - \seq_item:Nn \l_@@_crossing_seq {2}) * \@@_dim_value:n {width} }
-            { (\seq_item:Nn \l_@@_crossing_seq {1} - \seq_item:Nn \l_@@_crossing_seq {2}) * \@@_dim_value:n {width} }
+            {
+              (\seq_item:Nn \l_@@_crossing_seq {1}
+              - \seq_item:Nn \l_@@_crossing_seq {2})
+              * \@@_dim_value:n {width}
+            }
+            {
+              (\seq_item:Nn \l_@@_crossing_seq {1}
+              - \seq_item:Nn \l_@@_crossing_seq {2})
+              * \@@_dim_value:n {width}
+            }
           }
         }
         {
@@ -1564,7 +1855,10 @@ and the derived files            README.txt,
             {.5 + \@@_value:n {gap} }
             {0}
             {\l_@@_control_fp}
-            {\@@_dim_value:n {height} - 2* \l_@@_nudge_fp - \l_@@_control_fp}
+            {
+              \@@_dim_value:n {height} - 2* \l_@@_nudge_fp
+              - \l_@@_control_fp
+            }
             {\@@_dim_value:n {height} - 2* \l_@@_nudge_fp}
           }
         }
@@ -1578,8 +1872,16 @@ and the derived files            README.txt,
             {.5 + \@@_value:n {gap} }
             {0}
             {0}
-            { (\seq_item:Nn \l_@@_crossing_seq {1} - \seq_item:Nn \l_@@_crossing_seq {2}) * \@@_dim_value:n {width} }
-            { (\seq_item:Nn \l_@@_crossing_seq {1} - \seq_item:Nn \l_@@_crossing_seq {2}) * \@@_dim_value:n {width} }
+            {
+              (\seq_item:Nn \l_@@_crossing_seq {1}
+              - \seq_item:Nn \l_@@_crossing_seq {2})
+              * \@@_dim_value:n {width}
+            }
+            {
+              (\seq_item:Nn \l_@@_crossing_seq {1}
+              - \seq_item:Nn \l_@@_crossing_seq {2})
+              * \@@_dim_value:n {width}
+            }
           }
         }
         {
@@ -1589,26 +1891,86 @@ and the derived files            README.txt,
             {.5 + \@@_value:n {gap} }
             {0}
             {\l_@@_control_fp}
-            {\@@_dim_value:n {height} - 2* \l_@@_nudge_fp - \l_@@_control_fp}
+            {
+              \@@_dim_value:n {height} - 2* \l_@@_nudge_fp
+              - \l_@@_control_fp
+            }
             {\@@_dim_value:n {height} - 2* \l_@@_nudge_fp}
           }
         }
 
         {0}
-        { \fp_eval:n { -\l_@@_control_fp  * (.5 - \@@_value:n {gap} ) } }
+        { \fp_eval:n {
+            -\l_@@_control_fp  * (.5 - \@@_value:n {gap} )
+          }
+        }
 
 
-        {\fp_eval:n {(\seq_item:Nn \l_@@_crossing_seq {1} - 1) * \@@_dim_value:n {width} }}
-        {\fp_eval:n { \l_@@_height_fp + \@@_dim_value:n {height} - \l_@@_nudge_fp }}
+        {\fp_eval:n
+          {
+            (\seq_item:Nn \l_@@_crossing_seq {1} - 1)
+            * \@@_dim_value:n {width}
+          }
+        }
+        {\fp_eval:n
+          {
+            \l_@@_height_fp + \@@_dim_value:n {height}
+            - \l_@@_nudge_fp
+          }
+        }
         
       }
-
-      \prop_put:NxV \l_@@_strands_prop {\seq_item:Nn \l_@@_crossing_seq {2}} \l_@@_tmpa_tl
-      \prop_put:NxV \l_@@_strands_prop {\seq_item:Nn \l_@@_crossing_seq {1}} \l_@@_tmpb_tl
-
-      \int_compare:nT {\int_max:nn {\seq_item:Nn \l_@@_crossing_seq {1} } {\seq_item:Nn \l_@@_crossing_seq {2} } - \int_min:nn {\seq_item:Nn \l_@@_crossing_seq {1} } {\seq_item:Nn \l_@@_crossing_seq {2} } > 1}
+%    \end{macrocode}
+% Now put those new strands back in the prop.
+%    \begin{macrocode}
+      \prop_put:NxV \l_@@_strands_prop
+      {\seq_item:Nn \l_@@_crossing_seq {2}} \l_@@_tmpa_tl
+      \prop_put:NxV \l_@@_strands_prop
+      {\seq_item:Nn \l_@@_crossing_seq {1}} \l_@@_tmpb_tl
+%    \end{macrocode}
+% If the strands are more than one apart, the intermediate strands need to be broken as well.
+%    \begin{macrocode}
+      \int_compare:nT
       {
-        \int_step_inline:nnnn {\int_min:nn {\seq_item:Nn \l_@@_crossing_seq {1} } {\seq_item:Nn \l_@@_crossing_seq {2} } + 1} {1}  {\int_max:nn {\seq_item:Nn \l_@@_crossing_seq {1} } {\seq_item:Nn \l_@@_crossing_seq {2} } - 1}
+        \int_max:nn
+        {
+          \seq_item:Nn \l_@@_crossing_seq {1}
+        }
+        {
+          \seq_item:Nn \l_@@_crossing_seq {2}
+        }
+        -
+        \int_min:nn
+        {
+          \seq_item:Nn \l_@@_crossing_seq {1}
+        }
+        {
+          \seq_item:Nn \l_@@_crossing_seq {2}
+        }
+        > 1
+      }
+      {
+        \int_step_inline:nnnn
+        {
+          \int_min:nn
+          {
+            \seq_item:Nn \l_@@_crossing_seq {1}
+          }
+          {
+            \seq_item:Nn \l_@@_crossing_seq {2}
+          }
+          + 1}
+        {1}
+        {
+          \int_max:nn
+          {
+            \seq_item:Nn \l_@@_crossing_seq {1}
+          }
+          {
+            \seq_item:Nn \l_@@_crossing_seq {2}
+          }
+          - 1
+        }
         {
 
           \prop_get:NnN \l_@@_strands_prop {####1} \l_@@_tmpa_tl
@@ -1616,46 +1978,59 @@ and the derived files            README.txt,
             {
               \exp_not:N \@@_lineto:nn
               {\fp_eval:n {(####1 - 1) * \@@_dim_value:n {width} }}
-              {\fp_eval:n { \l_@@_height_fp + \l_@@_nudge_fp + .5 * \l_@@_control_fp } }
+              {\fp_eval:n
+                {
+                  \l_@@_height_fp + \l_@@_nudge_fp
+                  + .5 * \l_@@_control_fp
+                }
+              }
               \exp_not:N \@@_moveto:nn
               {\fp_eval:n {(####1 - 1) * \@@_dim_value:n {width} }}
-              {\fp_eval:n { \l_@@_height_fp + \@@_dim_value:n {height} - \l_@@_nudge_fp - .5 * \l_@@_control_fp } }
+              {\fp_eval:n
+                {
+                  \l_@@_height_fp + \@@_dim_value:n {height}
+                  - \l_@@_nudge_fp - .5 * \l_@@_control_fp
+                }
+              }
             }
 
             \prop_put:NnV \l_@@_strands_prop {####1} \l_@@_tmpa_tl
           }
       }
     }
-
+%    \end{macrocode}
+% If we're to step the level, increase the height and add a load of coordinates. 
+%    \begin{macrocode}
     \bool_if:NT \l_@@_step_level_bool
     {
       \fp_add:Nn \l_@@_height_fp { \@@_dim_value:n {height} }
       
       \int_step_inline:nnnn {1} {1} {\l_@@_strands_int}
       {
-        \prop_get:NnN \l_@@_crossing_permutation_prop {####1} \l_@@_tmpb_tl
-        \prop_get:NVN \l_@@_inverse_prop \l_@@_tmpb_tl \l_@@_tmpa_tl
+        \prop_get:NnN \l_@@_crossing_permutation_prop
+        {####1} \l_@@_tmpb_tl
+        \prop_get:NVN \l_@@_inverse_prop
+        \l_@@_tmpb_tl \l_@@_tmpa_tl
 
-        \tl_put_right:Nx \l_@@_coordinates_tl {
-          \exp_not:N \@@_coordinate:nnn
-          {-\l_@@_tmpb_tl-\int_use:N \l_@@_crossing_int}
-          {\fp_eval:n { (####1 - 1) * \@@_dim_value:n {width} }}
-          {\fp_to_decimal:N \l_@@_height_fp}
-          
-          \exp_not:N \@@_coordinate:nnn
-          {-\l_@@_tmpa_tl-rev-\int_eval:n { \l_@@_length_int - \l_@@_crossing_int }}
-          {\fp_eval:n { (####1 - 1) * \@@_dim_value:n {width} }}
-          {\fp_to_decimal:N \l_@@_height_fp}
-          
-        }
+        \@@_coordinate:xxxx
+        {-\l_@@_tmpb_tl-\int_use:N \l_@@_crossing_int}
+        {-rev-\l_@@_tmpa_tl-\int_use:N \l_@@_crossing_int }
+        {\fp_eval:n { (####1 - 1) * \@@_dim_value:n {width} }}
+        {\fp_to_decimal:N \l_@@_height_fp}
       }
       
       \int_incr:N \l_@@_crossing_int
     }
   }
 
-  \fp_add:Nn \l_@@_height_fp {sign(\@@_dim_value:n {height}) * \@@_dim_value:n {border~ height}}
-  
+  \fp_add:Nn \l_@@_height_fp
+  {
+    sign(\@@_dim_value:n {height})
+    * \@@_dim_value:n {border~ height}
+  }
+%    \end{macrocode}
+% Add a little bit to the end of each strand, together with some coordinates.
+%    \begin{macrocode}  
   \int_step_inline:nnnn {1} {1} {\l_@@_strands_int}
   {
     \prop_get:NxN \l_@@_strands_prop {##1} \l_@@_tmpa_tl
@@ -1665,26 +2040,27 @@ and the derived files            README.txt,
       \exp_not:N \@@_lineto:nn
       {\fp_eval:n { (##1 - 1) * \@@_dim_value:n {width} }}
       {\fp_to_decimal:N \l_@@_height_fp}
-      coordinate (-##1-rev-s)
+      coordinate (-rev-##1-e)
       coordinate (-\l_@@_tmpb_tl-e)
       ;
     }
     
     \prop_put:NnV \l_@@_strands_prop {##1} \l_@@_tmpa_tl
   }
-
+%    \end{macrocode}
+% This is where we actually carry out the drawing commands.
+%    \begin{macrocode}
   \int_step_inline:nnnn {1} {1} {\l_@@_strands_int}
   {
     \prop_get:NnN \l_@@_strands_prop {##1} \l_@@_tmpa_tl
     \tl_use:N \l_@@_tmpa_tl
   }
-  \tl_put_right:Nn \l_@@_coordinates_tl {;}
-  \tl_use:N \l_@@_coordinates_tl
 }
 %    \end{macrocode}
 % \end{macro}
 %
-% \begin{macro}{}
+% \begin{macro}{\@@_moveto:nn, \@@_lineto:nn, \@@_curveto:nnnnnn, \@@_coordinate:nnnn}
+% These are our interfaces to the TikZ code.
 %    \begin{macrocode}
 \cs_new_nopar:Npn \@@_moveto:nn #1#2
 {
@@ -1699,10 +2075,17 @@ and the derived files            README.txt,
   .. controls +(#1 pt, #2 pt) and +(#3 pt, #4 pt)
   .. (#5 pt, #6 pt)
 }
-\cs_new_nopar:Npn \@@_coordinate:nnn #1#2#3
+\cs_new_nopar:Npn \@@_coordinate:nnnn #1#2#3#4
 {
-  (#2 pt,#3 pt) coordinate (#1)
+  \coordinate[alias=#2] (#1) at (#3 pt,#4 pt);
 }
+\cs_generate_variant:Nn \@@_coordinate:nnnn {xxxx}
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}[internal]{\@@_bezier_point:nnnnn, \@@_bezier_tangent:nnnnn}
+% Used to calculate intermediate points and tangents on a bezier curve.
+%    \begin{macrocode}
 \cs_new_nopar:Npn \@@_bezier_point:nnnnn #1#2#3#4#5
 {
   \fp_eval:n
@@ -1727,11 +2110,14 @@ and the derived files            README.txt,
     3 * (#1) * (#1) * (#5 - (#4))
   }
 }
-\cs_new_nopar:Npn \@@_do_fence:nnnnn #1#2#3#4#5
+\cs_new_nopar:Npn \@@_do_floor:nnnnn #1#2#3#4#5
 {
-  \path[braid/every~ fence/.try, braid/fence~#1/.try] (#2,#3) rectangle (#4,#5);
+  \path[
+    braid/every~ floor/.try,
+    braid/floor~#1/.try
+  ] (#2,#3) to[braid/every~ floor~ path/.try, braid/floor~#1~path/.try] (#4,#5);
 }
-\cs_generate_variant:Nn \@@_do_fence:nnnnn {Vxxxx}
+\cs_generate_variant:Nn \@@_do_floor:nnnnn {Vxxxx}
 %    \end{macrocode}
 % \end{macro}
 %    \begin{macrocode}

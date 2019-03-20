@@ -4,6 +4,7 @@
 \usepackage{morefloats}
 \usepackage{tikz}
 \usepackage{braids}
+\usetikzlibrary{braids}
 \usepackage[numbered]{hypdoc}
 \definecolor{lstbgcolor}{rgb}{0.9,0.9,0.9} 
  
@@ -31,10 +32,10 @@
 }
 
 \providecommand*{\url}{\texttt}
-\GetFileInfo{braids.sty}
+\GetFileInfo{tikzlibrarybraids.code.tex}
 
 \title{The \textsf{braids} Package: Documentation}
-\author{Andrew Stacey \\ \url{stacey@math.ntnu.no}}
+\author{Andrew Stacey \\ \texttt{loopspace@mathforge.org}}
 \date{\fileversion~from \filedate}
 
 \begin{document}
@@ -42,8 +43,23 @@
 \maketitle
 
 \begin{center}
-\begin{tikzpicture}
-\braid[width=.75cm,height=.5cm,line width=1.5pt,red,line cap=round,style strands={3,6,7,10,14,15,16,18}{gray,line width=1pt}] s_1-s_4-s_8-s_{12}-s_{16} s_2-s_5-s_7-s_9-s_{13}-s_{15} s_2-s_5-s_7-s_9-s_{15} s_1-s_4-s_8-s_{16} s_1-s_4-s_7-s_9-s_{17} s_2-s_5-s_{17} s_2-s_{13}-s_{16} s_1-s_{12}-s_{15};
+  \begin{tikzpicture}
+  \pic[
+    line width=1.5pt,
+    red,
+    line cap=round,
+    braid/.cd,
+    width=.75cm,
+    height=.5cm,
+    strand 3/.style={gray,line width=1pt},
+    strand 6/.style={gray,line width=1pt},
+    strand 7/.style={gray,line width=1pt},
+    strand 10/.style={gray,line width=1pt},
+    strand 14/.style={gray,line width=1pt},
+    strand 15/.style={gray,line width=1pt},
+    strand 16/.style={gray,line width=1pt},
+    strand 18/.style={gray,line width=1pt},
+  ] {braid={s_1-s_4-s_8-s_{12}-s_{16} s_2-s_5-s_7-s_9-s_{13}-s_{15} s_2-s_5-s_7-s_9-s_{15} s_1-s_4-s_8-s_{16} s_1-s_4-s_7-s_9-s_{17} s_2-s_5-s_{17} s_2-s_{13}-s_{16} s_1-s_{12}-s_{15}}};
 \end{tikzpicture}
 \end{center}
 
@@ -55,12 +71,185 @@ An example follows.
 \begin{example}
 \begin{center}
 \begin{tikzpicture}
-\braid[rotate=90,style strands={1}{red},style strands={2}{blue},style strands={3}{green}] s_1 s_2^{-1} s_1 s_2^{-1} s_1 s_2^{-1};
+\pic[
+  rotate=90,
+  braid/.cd,
+  strand 1/.style={red},
+  strand 2/.style={green},
+  strand 3/.style={blue},
+] {braid={s_1 s_2^{-1} s_1 s_2^{-1} s_1 s_2^{-1}}};
 \end{tikzpicture}
 \end{center}
 \end{example}
 
-\section{Usage}
+\section{TikZ Library Usage}
+
+Version 2.0 changed the implementation to use the TikZ \Verb+pic+ syntax.
+It also converted it to a TikZ library, so to use it put the following in the preamble.
+
+\begin{verbatim}
+\usetikzlibrary{braids}
+\end{verbatim}
+
+\DescribeMacro{braid}
+A braid is specified by the pic name \Verb+braid+.
+The usual syntax for this is as follows:
+
+\Verb+\pic[options] (name) at (coordinate) {braid={braid-word}};+
+
+\DescribeMacro{braid-word}
+The \Verb+braid-word+ is an expression in the braid group, such as \Verb+s_1 s_2^{-1} s_{3,5}+.
+The generator labels are not significant.
+If the subscript is a single number, as in \Verb+s_2+, the crossing goes from that number over the next.
+If the subscript is two numbers, as in \Verb+s_{2,4}+, the crossing goes from the first over the second, with both the crossing strands passing over all of the intervening strands.
+The exponent can be \Verb+1+, \Verb+{-1}+, or missing (in which case it defaults to \Verb+1+, note also that the exponent is read as a \TeX-token so \Verb+{1}+ is also legal).
+If the exponent is \(-1\) then the over and under strands swap.
+
+\begin{itemize}
+\item \Verb+s_1+ is strand \(1\) over strand \(2\).
+\item \Verb+s_1^{-1}+ is strand \(2\) over strand \(1\).
+\item \Verb+s_{1,3}+ is strand \(1\) over strand \(3\), and both are over strand \(2\).
+\end{itemize}
+
+Certain other symbols are allowed in the \Verb+braid-word+ which control the rendering of the braid.
+These extras are as follows.
+
+\begin{enumerate}
+\item To get crossings to render at the same height, separate them with a hyphen (note: no check is made to ensure that the crossings can legally be put at the same height; \emph{caveat emptor}).
+For example, \Verb+s_1-s_2+.
+
+\item To draw a \emph{floor}, precede the braid element by a vertical line, as in \Verb+s_1 | s_2+.
+The floor is a rectangular path which is drawn behind the braid and can be styled with the keys \Verb+braid/every floor+ and \Verb+braid/floor <n>+.
+The \Verb+n+ is the crossing number.
+
+\item The identity element can occur in the braid-word.
+It is represented by \Verb+1+.
+This inserts the identity which corresponds to no crossing.
+However, it takes the same amount of space as if there were a crossing.
+
+\end{enumerate}
+
+\subsection{Style Options}
+\label{sec:styleopts}
+
+There are various keys that change the behaviour or rendering of the braid.
+All of these are in the \Verb+/tikz/braid/+ namespace.
+
+\DescribeMacro{number of strands} The key \Verb+number of strands+ sets the minimum number of strands for the braid.
+The number of strands will grow according to the terms in the braid word so this merely sets a lower bound.
+If not set, the number of strands will be determined by the terms in the braid word.
+
+\DescribeMacro{height}
+The key \Verb+height+ sets the height of the piece of the braid corresponding to an element in the group.
+This can be negative.
+
+\DescribeMacro{width}
+The key \Verb+width+ sets the separation of the strands in the braid.
+This can be negative.
+
+\DescribeMacro{border height}
+The key \Verb+border height+ adds a little extra length to the strands at the start and end of the braid.
+
+\DescribeMacro{gap}
+The key \Verb+gap+ is used to determine how much of a gap to leave in the under strand at a crossing.
+This should be a number strictly between 0 and .5.
+The curve is drawn using a cubic bezier and the gap is in terms of the time parameter, so the gap will not increase exactly proportionally to the value given by this key, though that is a reasonable approximation.
+
+\DescribeMacro{control factor}
+As just said, the parts of the strands involved in a crossing are drawn using a cubic bezier curve.
+The control points are vertically above or below their respective end point.
+This key determines that vertical separation.
+It is multiplied by the \Verb+height+ so that it scales properly.
+It can be set to 0 whereupon the strands in the crossing are straight lines.
+The default is 0.5.
+
+\DescribeMacro{nudge factor}
+The crossings are not quite placed one after another.
+There is a small ``nudge'' between the end of one crossing and the start of another.
+Due to the way that the strands are lengthened, if there is no ``nudge'' then some PDF renderers produce slightly strange results at certain magnifications.
+This key controls how much that ``nudge'' is, as a factor of the \Verb+height+.
+For the aforementioned reason, it should not be set to 0 (the default is 0.05).
+Note that this does not change the height of a crossing.
+Rather, it nudges the height at which the strands start to cross over.
+
+\DescribeMacro{every strand, strand <n>}
+The style of the strands are controlled by two types of option.
+Style options that are set on the \Verb+pic+ are passed to every strand.
+It is also possible to add style options to individual strands using the keys \Verb+every strand+ and \Verb+strand <n>+.
+The strands are numbered by their starting position.
+
+\DescribeMacro{every floor, floor <n>}
+When a floor is requested behind a crossing, it is rendered as a rectangular path.
+These keys control how the floor is displayed.
+
+\subsection{Coordinates}
+
+The braid is littered with coordinates.
+Each strand gets a coordinate at each end, and at every level between crossings.
+These are labelled and numbered by the initial strand position and the crossing level.
+They are also labelled and numbered by the final strand position with the prefix \Verb+rev+.
+
+\section{Examples}
+
+Here are more detailed examples.
+
+\begin{example}
+\begin{center}
+\begin{tikzpicture}
+\pic[
+  braid/every floor path/.style={
+    to path={ (\tikztostart |- \tikztotarget) -- (\tikztotarget) (\tikztostart) -- (\tikztostart -| \tikztotarget)}
+  },
+  braid/every floor/.style={fill=yellow},
+  braid/floor 1/.style={draw=black,dashed,fill=yellow!50!green},
+  line width=2pt,
+  braid/strand 1/.style={red},
+  braid/strand 2/.style={blue},
+  braid/strand 3/.style={green},
+  name prefix=braid,
+] at (2,0) {braid={| s_1-s_3-s_5 | s_2^{-1}-s_4| s_1-s_4 s_2^{-1} s_1-s_3 s_2^{-1}-s_4^{-1}}};
+\fill[yellow] (2,0) circle (4pt);
+\node[at=(braid-3-s),pin=north west:strand 3 start] {};
+\node[at=(braid-3-e),pin=south west:strand 3 end] {};
+\node[at=(braid-rev-3-s),pin=north east:strand 3 start (from bottom)] {};
+\node[at=(braid-rev-3-e),pin=south east:strand 3 end (from bottom)] {};
+\end{tikzpicture}
+\end{center}
+\end{example}
+
+\begin{example}
+\begin{center}
+\begin{tikzpicture}
+\pic[
+  braid/.cd,
+  number of strands=3,
+  line width=8pt,
+  strand 1/.style={red},
+  strand 2/.style={green},
+  strand 3/.style={blue},
+  gap=0.1,
+  control factor=0,
+  nudge factor=0,
+  name prefix=braid,
+] {braid={a_2 a_1 a_2^{-1} a_1}};
+\node[circle,draw,fill=white,inner sep=0pt] at (braid-2-1) {\(+\)};
+\node[circle,draw,fill=white,inner sep=0pt] at (braid-3-1) {\(-\)};
+\node[circle,draw,fill=white,inner sep=0pt] at (braid-2-3) {\(+\)};
+\end{tikzpicture}
+\end{center}
+
+\end{example}
+
+
+\section{Original Package Usage}
+
+The original version was as a separate package.
+This is still included for backwards compatibility.
+To use this package, you need to put the following in the preamble.
+
+\begin{verbatim}
+\usepackage{braids}
+\end{verbatim}
 
 \DescribeMacro{\braid}
 A braid is specified by the command \Verb+\braid+.
