@@ -95,7 +95,7 @@ It also converted it to a TikZ library, so to use it put the following in the pr
 A braid is specified by the pic name \Verb+braid+.
 The usual syntax for this is as follows:
 
-\Verb+\pic[options] (name) at (coordinate) {braid={braid-word}};+
+\Verb+\pic[options] at (coordinate) {braid={braid-word}};+
 
 \DescribeMacro{braid-word}
 The \Verb+braid-word+ is an expression in the braid group, such as \Verb+s_1 s_2^{-1} s_{3,5}+.
@@ -116,11 +116,15 @@ These extras are as follows.
 
 \begin{enumerate}
 \item To get crossings to render at the same height, separate them with a hyphen (note: no check is made to ensure that the crossings can legally be put at the same height; \emph{caveat emptor}).
-For example, \Verb+s_1-s_2+.
+For example, \Verb+s_1-s_3+.
 
-\item To draw a \emph{floor}, precede the braid element by a vertical line, as in \Verb+s_1 | s_2+.
-The floor is a rectangular path which is drawn behind the braid and can be styled with the keys \Verb+braid/every floor+ and \Verb+braid/floor <n>+.
+\item To draw a \emph{floor} -- which is a rectangle behind the braid occupying one level -- precede the braid element by a vertical line, as in \Verb+s_1 | s_2+.
+The floor is itself a pic which, by default, consists of a rectangle and two horizontal lines.
+The rectangle picks up any \Verb+fill+ options and the lines any \Verb+draw+ options that are set in the \Verb+braid/every floor+ and \Verb+braid/floor <n>+ styles.
 The \Verb+n+ is the crossing number.
+
+Replacing this pic will change how the floor is drawn.
+The coordinate system is set up for the floor pic so that the floor is a unit square at the origin.
 
 \item The identity element can occur in the braid-word.
 It is represented by \Verb+1+.
@@ -130,7 +134,7 @@ However, it takes the same amount of space as if there were a crossing.
 \end{enumerate}
 
 \subsection{Style Options}
-\label{sec:styleopts}
+\label{sec:picstyleopts}
 
 There are various keys that change the behaviour or rendering of the braid.
 All of these are in the \Verb+/tikz/braid/+ namespace.
@@ -179,8 +183,8 @@ It is also possible to add style options to individual strands using the keys \V
 The strands are numbered by their starting position.
 
 \DescribeMacro{every floor, floor <n>}
-When a floor is requested behind a crossing, it is rendered as a rectangular path.
-These keys control how the floor is displayed.
+When a floor is requested behind a crossing, it is rendered as a pic.
+These keys control how the floor is styled.
 
 \subsection{Coordinates}
 
@@ -197,9 +201,6 @@ Here are more detailed examples.
 \begin{center}
 \begin{tikzpicture}
 \pic[
-  braid/every floor path/.style={
-    to path={ (\tikztostart |- \tikztotarget) -- (\tikztotarget) (\tikztostart) -- (\tikztostart -| \tikztotarget)}
-  },
   braid/every floor/.style={fill=yellow},
   braid/floor 1/.style={draw=black,dashed,fill=yellow!50!green},
   line width=2pt,
