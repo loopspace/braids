@@ -9,6 +9,11 @@
 }
 
 \begin{document}
+\begin{tikzpicture}[ultra thick]
+\pic[scale=2,rotate=30] {braid={s_1 s_2 s_1^{-1}}};
+\end{tikzpicture}
+
+
 \begin{tikzpicture}[>=Latex]
 \pic[
   ultra thick,
@@ -20,7 +25,7 @@
   braid/number of strands=6,
   braid/width=1cm,
   braid/gap=.1,
-  braid/anchor=rev-2-0,
+  braid/anchor=2-0,
   name prefix=braid,
 ] {braid={|s_{1,5} s_2^{-1} | 1 s_3-s_1 1}};% s_2 | s_1^{-1}-s_3 | 1 s_1}};
 \draw[<-] (braid-1-e) -- +(0,-1) node[below] {End of strand 1};

@@ -74,6 +74,7 @@ An example follows.
 \pic[
   rotate=90,
   braid/.cd,
+  every strand/.style={ultra thick},
   strand 1/.style={red},
   strand 2/.style={green},
   strand 3/.style={blue},
@@ -90,6 +91,10 @@ It also converted it to a TikZ library, so to use it put the following in the pr
 \begin{verbatim}
 \usetikzlibrary{braids}
 \end{verbatim}
+
+(Or add it to the copious list of TikZ libraries that you are already using.)
+
+\bigskip
 
 \DescribeMacro{braid}
 A braid is specified by the pic name \Verb+braid+.
@@ -121,10 +126,10 @@ For example, \Verb+s_1-s_3+.
 \item To draw a \emph{floor} -- which is a rectangle behind the braid occupying one level -- precede the braid element by a vertical line, as in \Verb+s_1 | s_2+.
 The floor is itself a pic which, by default, consists of a rectangle and two horizontal lines.
 The rectangle picks up any \Verb+fill+ options and the lines any \Verb+draw+ options that are set in the \Verb+braid/every floor+ and \Verb+braid/floor <n>+ styles.
-The \Verb+n+ is the crossing number.
+The \Verb+n+ is the level number, starting at \(1\).
 
 Replacing this pic will change how the floor is drawn.
-The coordinate system is set up for the floor pic so that the floor is a unit square at the origin.
+The coordinate system is set up for the floor pic so that the floor is a unit square with lower left corner at the origin.
 
 \item The identity element can occur in the braid-word.
 It is represented by \Verb+1+.
@@ -186,12 +191,36 @@ The strands are numbered by their starting position.
 When a floor is requested behind a crossing, it is rendered as a pic.
 These keys control how the floor is styled.
 
-\subsection{Coordinates}
+\subsection{Coordinates and Anchors}
 
 The braid is littered with coordinates.
 Each strand gets a coordinate at each end, and at every level between crossings.
 These are labelled and numbered by the initial strand position and the crossing level.
 They are also labelled and numbered by the final strand position with the prefix \Verb+rev+.
+With a \Verb+name prefix+, the coordinate names look like the following:
+%
+\begin{verbatim}
+<name prefix>-<strand number>-<crossing number>
+<name prefix>-rev-<strand number>-<crossing number>
+\end{verbatim}
+%
+The crossing number can also be either \Verb+s+ or \Verb+e+ for the start and end of the strand.
+Note that \Verb+-1-0+ and \Verb+-1-s+ are slightly different in that \Verb+s+ includes the border height.
+
+\DescribeMacro{anchor}
+The key \Verb+anchor+ (in the \Verb+braid+ name space) can be used to shift the braid so that a different part of it is at the specified location.
+It uses the same syntax as the coordinates, except without the \Verb+<name prefix>-+.
+In the following example, the braid is shifted so that where the third strand starts the second level is at the position \Verb+(1,1)+
+
+\begin{example}
+\begin{center}
+\begin{tikzpicture}
+\fill[purple] (1,1) circle[radius=3mm];
+\pic[braid/anchor=3-2,rotate=90] at (1,1) {braid={s_2 s_1 s_2 s_1}};
+\end{tikzpicture}
+\end{center}
+\end{example}
+
 
 \section{Examples}
 
@@ -212,8 +241,8 @@ Here are more detailed examples.
 \fill[yellow] (2,0) circle (4pt);
 \node[at=(braid-3-s),pin=north west:strand 3 start] {};
 \node[at=(braid-3-e),pin=south west:strand 3 end] {};
-\node[at=(braid-rev-3-s),pin=north east:strand 3 start (from bottom)] {};
-\node[at=(braid-rev-3-e),pin=south east:strand 3 end (from bottom)] {};
+\node[at=(braid-rev-3-s),pin=north east:strand 3 (from bottom) start] {};
+\node[at=(braid-rev-3-e),pin=south east:strand 3 (from bottom) end] {};
 \end{tikzpicture}
 \end{center}
 \end{example}
@@ -241,8 +270,9 @@ Here are more detailed examples.
 
 \end{example}
 
+\newpage
 
-\section{Original Package Usage}
+\section{Original Package Usage (Depreciated)}
 
 The original version was as a separate package.
 This is still included for backwards compatibility.
@@ -289,7 +319,7 @@ The third argument is the label text.
 The three commands differ as to how they interpret the strand number.
 For \Verb+\olabel+, the strand number is taken to mean the strand that starts at that position.
 For \Verb+\clabel+, the strand number is taken to mean the strand that is currently at that position.
-The behaviour of \Verb+\labal+ is to choose one or other of these depending on whether the key \Verb+strand label by origin+ is true or false.
+The behaviour of \Verb+\label+ is to choose one or other of these depending on whether the key \Verb+strand label by origin+ is true or false.
 This key only has an effect at the start of the braid-word; it cannot be reset in the middle.
 
 \item Style options can be given in the middle of a braid-word by enclosing them in square brackets.
@@ -414,6 +444,7 @@ Here are more detailed examples.
 \end{example}
 
 \begin{example}
+\begin{center}
 \begin{tikzpicture}
 \braid[
   number of strands=3,
@@ -428,7 +459,10 @@ Here are more detailed examples.
   strand label/.style={circle,draw,fill=white,inner sep=0pt},
   yscale=1] (braid_1) a_2 \label{2}{\(+\)} \clabel{2}{\(-\)} a_1 a_2^{-1} \olabel{2}{\(+\)} a_1;
 \end{tikzpicture}
+\end{center}
+
 \end{example}
+
 \end{document}
 % Local Variables:
 % tex-output-type: "pdf18"
