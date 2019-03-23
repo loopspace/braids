@@ -59,10 +59,10 @@ and the derived files            README.txt,
 \endpostamble
 \usedir{tex/latex/braids}
 \generate{
-  \file{\jobname.sty}{\from{\jobname.dtx}{package}}
+  \file{braids.sty}{\from{\jobname.dtx}{package}}
 }
 \generate{
-  \file{tikzlibrary\jobname.code.tex}{\from{\jobname.dtx}{library}}
+  \file{tikzlibrarybraids.code.tex}{\from{\jobname.dtx}{library}}
 }
 %</install>
 %<install>\endbatchfile
@@ -1211,6 +1211,7 @@ and the derived files            README.txt,
 \int_new:N \l_@@_strands_int
 \int_new:N \l_@@_crossing_int
 \int_new:N \l_@@_anchor_level_int
+\int_new:N \l_@@_floor_int
 \seq_new:N \l_@@_word_seq
 \seq_new:N \l_@@_crossing_seq
 \seq_new:N \l_@@_anchor_seq
@@ -1354,11 +1355,27 @@ and the derived files            README.txt,
         \seq_put_right:NV \l_@@_word_seq \l_@@_tmpa_tl
         \tl_clear:N \l_@@_tmpa_tl
       }
-      \seq_put_right:Nn \l_@@_word_seq
+      \tl_set:Nx \l_@@_tmpa_tl {\tl_head:N \l_@@_tmpb_tl}
+      \tl_if_eq:VnTF \l_@@_tmpa_tl {-}
       {
-        \bool_set_true:N \l_@@_floor_bool
-        \bool_set_false:N \l_@@_step_level_bool
+        \tl_set:Nx \l_@@_tmpb_tl {\tl_tail:N \l_@@_tmpb_tl}
+        \tl_set:Nx \l_@@_tmpc_tl {\tl_head:N \l_@@_tmpb_tl}
+        \tl_set:Nx \l_@@_tmpb_tl {\tl_tail:N \l_@@_tmpb_tl}
       }
+      {
+        \tl_set:Nx \l_@@_tmpc_tl {1}
+      }
+      \tl_clear:N \l_@@_tmpa_tl
+      \tl_set:Nn \l_@@_tmpa_tl {
+        \bool_set_false:N \l_@@_step_level_bool
+        \bool_set_true:N \l_@@_floor_bool
+        \int_set:Nn \l_@@_floor_int
+      }
+      \tl_put_right:Nx \l_@@_tmpa_tl 
+      { { \tl_use:N \l_@@_tmpc_tl } }
+
+      \seq_put_right:NV \l_@@_word_seq \l_@@_tmpa_tl
+      \tl_clear:N \l_@@_tmpa_tl
      }
 %    \end{macrocode}
 % Hyphen says the next crossing is on the same level as the current one.
@@ -1479,6 +1496,7 @@ and the derived files            README.txt,
 %    \begin{macrocode}
     \seq_clear:N \l_@@_crossing_seq
     \bool_set_true:N \l_@@_step_level_bool
+    \bool_set_false:N \l_@@_swap_crossing_bool
 %    \end{macrocode}
 % Run the details of this crossing.
 %    \begin{macrocode}
@@ -1564,6 +1582,7 @@ and the derived files            README.txt,
   {
     \bool_set_true:N \l_@@_step_level_bool
     \seq_clear:N \l_@@_crossing_seq
+    \bool_set_false:N \l_@@_swap_crossing_bool
     ##1
     \seq_if_empty:NF \l_@@_crossing_seq
     {
@@ -1789,6 +1808,7 @@ and the derived files            README.txt,
     \seq_clear:N \l_@@_crossing_seq
     \bool_set_true:N \l_@@_step_level_bool
     \bool_set_false:N \l_@@_floor_bool
+    \bool_set_false:N \l_@@_swap_crossing_bool
     ##1
 %    \end{macrocode}
 % If we're drawing a floor, do so straightaway.
@@ -1805,7 +1825,7 @@ and the derived files            README.txt,
       }
       {\fp_to_decimal:N \l_@@_height_fp pt}
       {\fp_eval:n { \l_@@_width_fp / \dim_to_fp:n {1cm} }}
-      {\fp_eval:n {\@@_dim_value:n {height} / \dim_to_fp:n {1cm}}}
+      {\fp_eval:n { (\l_@@_floor_int) * ( \@@_dim_value:n {height} ) / \dim_to_fp:n {1cm}}}
     }
 %    \end{macrocode}
 % If we have a crossing, process it.

@@ -1,5 +1,5 @@
 \RequirePackage{shellesc}
-\immediate\write18{tex braids.dtx}
+\immediate\write18{tex braids_code.dtx}
 \documentclass{article}
 
 \usepackage{tikz}
@@ -10,9 +10,10 @@
 
 \begin{document}
 \begin{tikzpicture}[ultra thick]
-\pic[scale=2,rotate=30] {braid={s_1 s_2 s_1^{-1}}};
+\pic[name prefix=braid] {braid={s_1 s_2}};
+\fill (braid-1-s) circle[radius=2mm];
 \end{tikzpicture}
-
+\end{document}
 
 \begin{tikzpicture}[>=Latex]
 \pic[
