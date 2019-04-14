@@ -1215,6 +1215,7 @@ and the derived files            README.txt,
 \seq_new:N \l_@@_word_seq
 \seq_new:N \l_@@_crossing_seq
 \seq_new:N \l_@@_anchor_seq
+\seq_new:N \l_@@_floors_seq
 \str_new:N \l_@@_tmpa_str
 \str_new:N \l_@@_sup_str
 \str_set:Nn \l_@@_sup_str {^}
@@ -1288,6 +1289,13 @@ and the derived files            README.txt,
 %    \begin{macrocode}
    floor~ border/.initial=.25cm,
 %    \end{macrocode}
+% \Verb+floors+ is a list of floors to draw, specified as a cslist of coordinates as (x,y,w,h,a) in which the units are numbers of strands and crossing levels.
+% The parameters are: coordinates of lower left corner, width, height, (optional) name for styling.
+%    \begin{macrocode}
+   add~ floor/.code={
+     \seq_push:Nn \l_@@_floors_seq {#1}
+   },
+%    \end{macrocode}
 % \Verb+control factor+ determines the proportion of the \Verb+height+ used for the control points.
 %    \begin{macrocode}
    control~ factor/.initial=.5,
@@ -1355,25 +1363,11 @@ and the derived files            README.txt,
         \seq_put_right:NV \l_@@_word_seq \l_@@_tmpa_tl
         \tl_clear:N \l_@@_tmpa_tl
       }
-      \tl_set:Nx \l_@@_tmpa_tl {\tl_head:N \l_@@_tmpb_tl}
-      \tl_if_eq:VnTF \l_@@_tmpa_tl {-}
-      {
-        \tl_set:Nx \l_@@_tmpb_tl {\tl_tail:N \l_@@_tmpb_tl}
-        \tl_set:Nx \l_@@_tmpc_tl {\tl_head:N \l_@@_tmpb_tl}
-        \tl_set:Nx \l_@@_tmpb_tl {\tl_tail:N \l_@@_tmpb_tl}
-      }
-      {
-        \tl_set:Nx \l_@@_tmpc_tl {1}
-      }
-      \tl_clear:N \l_@@_tmpa_tl
+
       \tl_set:Nn \l_@@_tmpa_tl {
         \bool_set_false:N \l_@@_step_level_bool
         \bool_set_true:N \l_@@_floor_bool
-        \int_set:Nn \l_@@_floor_int
       }
-      \tl_put_right:Nx \l_@@_tmpa_tl 
-      { { \tl_use:N \l_@@_tmpc_tl } }
-
       \seq_put_right:NV \l_@@_word_seq \l_@@_tmpa_tl
       \tl_clear:N \l_@@_tmpa_tl
      }
@@ -1795,6 +1789,40 @@ and the derived files            README.txt,
     { \fp_to_decimal:N \l_@@_height_fp} 
   }
 %    \end{macrocode}
+%
+% Run through any extra floors requested.
+%    \begin{macrocode}
+  \seq_map_inline:Nn \l_@@_floors_seq
+  {
+    \tl_set:Nx \l_@@_tmpa_tl {\clist_item:nn {##1} {5}}
+    \@@_do_floor:Vxxxx \l_@@_tmpa_tl
+    {\fp_eval:n
+      {
+        -1*sign(\@@_dim_value:n{width})
+        * \@@_dim_value:n {floor~ border}
+        + (\@@_dim_value:n {width}) * (\clist_item:nn {##1} {1} - 1)
+      }
+      pt
+    }
+    {\fp_eval:n
+      {
+        \l_@@_height_fp + ( \@@_dim_value:n {height} ) * (\clist_item:nn {##1} {2})
+      }
+      pt
+    }
+    {\fp_eval:n {
+        ( (\clist_item:nn {##1} {3}) * \@@_dim_value:n {width}
+        + 2 * sign(\@@_dim_value:n{width})
+        * \@@_dim_value:n {floor~ border} ) / \dim_to_fp:n {1cm}
+      }
+    }
+    {\fp_eval:n {
+        (\clist_item:nn {##1} {4}) * ( \@@_dim_value:n {height} ) / \dim_to_fp:n {1cm}
+      }
+    }
+  }
+%    \end{macrocode}
+%
 % Keep track of the crossing level for the floor.
 %    \begin{macrocode}
   \int_zero:N \l_@@_crossing_int
@@ -1825,7 +1853,7 @@ and the derived files            README.txt,
       }
       {\fp_to_decimal:N \l_@@_height_fp pt}
       {\fp_eval:n { \l_@@_width_fp / \dim_to_fp:n {1cm} }}
-      {\fp_eval:n { (\l_@@_floor_int) * ( \@@_dim_value:n {height} ) / \dim_to_fp:n {1cm}}}
+      {\fp_eval:n { ( \@@_dim_value:n {height} ) / \dim_to_fp:n {1cm}}}
     }
 %    \end{macrocode}
 % If we have a crossing, process it.

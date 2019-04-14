@@ -123,12 +123,20 @@ These extras are as follows.
 \item To get crossings to render at the same height, separate them with a hyphen (note: no check is made to ensure that the crossings can legally be put at the same height; \emph{caveat emptor}).
 For example, \Verb+s_1-s_3+.
 
-\item To draw a \emph{floor} -- which is a rectangle behind the braid occupying one level -- precede the braid element by a vertical line, as in \Verb+s_1 | s_2+.
+\item To draw a \emph{floor} -- which is a rectangle behind the braid occupying some number of levels (the default being one level) -- precede the braid element by a vertical line, as in \Verb+s_1 | s_2+.
 The floor is itself a pic which, by default, consists of a rectangle and two horizontal lines.
 The rectangle picks up any \Verb+fill+ options and the lines any \Verb+draw+ options that are set in the \Verb+braid/every floor+ and \Verb+braid/floor <n>+ styles.
 The \Verb+n+ is the level number, starting at \(1\).
 
-The floor can be extended over several crossings using the syntax \Verb+|-<n>+ where \Verb+n+ is the number of levels to span.
+More general floors can be drawn using the key \Verb+braid/add floor+.
+This takes one argument which is a comma separated list of parameters that specifies the position and size floor:
+%
+\begin{verbatim}
+braid/add floor={x,y,width,height,name}
+\end{verbatim}
+%
+The units used are the ``natural'' units of the braid: strand separation and level height.
+The \Verb+name+ is optional and if given can be used to style the floor in that the style \Verb+braid/floor <name>+ is applied to that floor.
 
 Replacing the floor pic will change how it is drawn.
 The coordinate system is set up for the floor pic so that the floor is a unit square with lower left corner at the origin.
@@ -238,6 +246,8 @@ Here are more detailed examples.
   braid/strand 1/.style={red},
   braid/strand 2/.style={blue},
   braid/strand 3/.style={green},
+  braid/add floor={2,4,3,2,a},
+  braid/floor a/.style={fill=pink},
   name prefix=braid,
 ] at (2,0) {braid={| s_1-s_3-s_5 | s_2^{-1}-s_4| s_1-s_4 s_2^{-1} s_1-s_3 s_2^{-1}-s_4^{-1}}};
 \fill[yellow] (2,0) circle (4pt);
