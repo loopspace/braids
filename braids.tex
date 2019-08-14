@@ -10,7 +10,15 @@
  
 \usepackage{listings}
 \lstloadlanguages{[LaTeX]TeX}
-\lstset{breakatwhitespace=true,breaklines=true,language=TeX}
+ \lstset{
+  gobble=2,
+  breakatwhitespace=true,
+  breaklines=true,
+  language=[LaTeX]TeX,
+  basicstyle=\small\ttfamily,
+  keepspaces=true,
+  columns=fullflexible
+}
  
 \usepackage{fancyvrb}
 
@@ -21,7 +29,6 @@
    \begin{center}
    \setlength{\parindent}{0pt}
    \fbox{\begin{minipage}{.9\linewidth}
-     \lstset{breakatwhitespace=true,breaklines=true,language=TeX,basicstyle=\small}
      \lstinputlisting[]{example.out}
    \end{minipage}}
 
@@ -105,15 +112,27 @@ The usual syntax for this is as follows:
 \DescribeMacro{braid-word}
 The \Verb+braid-word+ is an expression in the braid group, such as \Verb+s_1 s_2^{-1} s_{3,5}+.
 The generator labels are not significant.
-If the subscript is a single number, as in \Verb+s_2+, the crossing goes from that number over the next.
-If the subscript is two numbers, as in \Verb+s_{2,4}+, the crossing goes from the first over the second, with both the crossing strands passing over all of the intervening strands.
+
+The subscript determines how the strands cross, as follows:
+\begin{enumerate}
+\item If the subscript is a single number, as in \Verb+s_2+, the crossing goes from that number over the next.
+\item If the subscript is two or more numbers separated by a comma, as in \Verb+s_{2,4}+ or \Verb+s_{1,3,5}+, imagine holding the numbered strands and moving each to the position of the next with the last strand moving under the others to where the first stands.
+Any intermediate non-specified strand is behind all those involved in the crossing.
+\item If the subscript is hyphenated, as in \Verb+s_{1-5}+, this is equivalent to \Verb+s_{1,2,3,4,5}+.
+This can be used as part of a list, as in \Verb+s_{1-3,5}+.
+\end{enumerate}
+
+All of these crossings take place in the same amount of vertical space.
+Be advised that crossings involving a lot of strands can get quite squashed.
+
 The exponent can be \Verb+1+, \Verb+{-1}+, or missing (in which case it defaults to \Verb+1+, note also that the exponent is read as a \TeX-token so \Verb+{1}+ is also legal).
-If the exponent is \(-1\) then the over and under strands swap.
+If the exponent is \(-1\) then the braid element represented by the crossing is inverted.
 
 \begin{itemize}
 \item \Verb+s_1+ is strand \(1\) over strand \(2\).
 \item \Verb+s_1^{-1}+ is strand \(2\) over strand \(1\).
 \item \Verb+s_{1,3}+ is strand \(1\) over strand \(3\), and both are over strand \(2\).
+\item \Verb+s_{1-3}+ is strand \(3\) under strand \(2\) and then under strand \(1\).
 \end{itemize}
 
 Certain other symbols are allowed in the \Verb+braid-word+ which control the rendering of the braid.
@@ -277,6 +296,26 @@ Here are more detailed examples.
 \node[circle,draw,fill=white,inner sep=0pt] at (braid-2-1) {\(+\)};
 \node[circle,draw,fill=white,inner sep=0pt] at (braid-3-1) {\(-\)};
 \node[circle,draw,fill=white,inner sep=0pt] at (braid-2-3) {\(+\)};
+\end{tikzpicture}
+\end{center}
+
+\end{example}
+
+\begin{example}
+\begin{center}
+\begin{tikzpicture}
+\pic[
+  braid/.cd,
+  number of strands=3,
+  ultra thick,
+  strand 1/.style={red},
+  strand 2/.style={green},
+  strand 3/.style={blue},
+  gap=0.1,
+%  control factor=0,
+%  nudge factor=0,
+  name prefix=braid,
+] {braid={a_{1-3} a_{1,3}}};
 \end{tikzpicture}
 \end{center}
 

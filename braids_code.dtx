@@ -125,6 +125,7 @@ and the derived files            README.txt,
 % \changes{1.0}{2011/05/03}{Converted to DTX file}
 % \changes{1.1}{2011/05/03}{Extended syntax}
 % \changes{2.0}{2019/03/20}{Converted TikZ library}
+% \changes{2.1}{2019/08/14}{Extended crossing capability}
 %
 % \DoNotIndex{\newcommand,\newenvironment}
 %
@@ -1181,7 +1182,7 @@ and the derived files            README.txt,
 % Life is so much easier with \LaTeX3.
 %    \begin{macrocode}
 \ProvidesFile{tikzlibrarybraids.code.tex}[%
-  2019/03/20 v2.0 Tikz/PGF library for drawing braid diagrams%
+  2019/08/18 v2.1 Tikz/PGF library for drawing braid diagrams%
 ]
 \RequirePackage{expl3}
 \ExplSyntaxOn
@@ -1211,6 +1212,12 @@ and the derived files            README.txt,
 \int_new:N \l_@@_length_int
 \int_new:N \l_@@_strands_int
 \int_new:N \l_@@_crossing_int
+\int_new:N \l_@@_crossing_start_int
+\int_new:N \l_@@_crossing_end_int
+\int_new:N \l_@@_crossing_width_int
+\int_new:N \l_@@_crossing_long_int
+\int_new:N \l_@@_crossing_start_factor_int
+\int_new:N \l_@@_crossing_end_factor_int
 \int_new:N \l_@@_anchor_level_int
 \int_new:N \l_@@_floor_int
 \seq_new:N \l_@@_tmpa_seq
@@ -1459,6 +1466,10 @@ and the derived files            README.txt,
   \int_compare:nT {\seq_count:N \l_@@_crossing_seq == 1}
   {
     \seq_put_right:Nx \l_@@_crossing_seq {\int_eval:n {#1 + 1} }
+  }
+  \bool_if:NF \l_@@_swap_crossing_bool
+  {
+    \seq_reverse:N \l_@@_crossing_seq
   }
 }
 %    \end{macrocode}
@@ -1878,20 +1889,45 @@ and the derived files            README.txt,
 %    \begin{macrocode}
     \seq_if_empty:NF \l_@@_crossing_seq
     {
+      \int_set:Nn \l_@@_crossing_long_int
+      {
+        %        \seq_item:Nn \l_@@_crossing_seq {\seq_count:N \l_@@_crossing_seq}
+        \seq_item:Nn \l_@@_crossing_seq {1}
+      }
+      \int_set:Nn \l_@@_crossing_start_int
+      {
+        \int_min:nn
+        {
+          \seq_item:Nn \l_@@_crossing_seq {1}
+        }
+        {
+          \seq_item:Nn \l_@@_crossing_seq {\seq_count:N \l_@@_crossing_seq}          
+        }
+      }
+      \int_set:Nn \l_@@_crossing_end_int
+      {
+        \int_max:nn
+        {
+          \seq_item:Nn \l_@@_crossing_seq {1}
+        }
+        {
+          \seq_item:Nn \l_@@_crossing_seq {\seq_count:N \l_@@_crossing_seq}          
+        }
+
+      }
+      \int_set:Nn \l_@@_crossing_width_int
+      {
+        \l_@@_crossing_end_int
+        -
+        \l_@@_crossing_start_int
+      }
 %    \end{macrocode}
 % Step through the crossing
 %    \begin{macrocode}
       \int_step_inline:nnn {2} {\seq_count:N \l_@@_crossing_seq}
       {
-        \bool_if:NTF \l_@@_swap_crossing_bool
-        {
-          \int_set:Nn \l_@@_tmpa_int {####1 - 1}
-          \int_set:Nn \l_@@_tmpb_int {####1}
-        }
-        {
-          \int_set:Nn \l_@@_tmpa_int {####1}
-          \int_set:Nn \l_@@_tmpb_int {####1 - 1}
-        }
+        \int_set:Nn \l_@@_tmpa_int {####1}
+        \int_set:Nn \l_@@_tmpb_int {####1 - 1}
 %    \end{macrocode}
 % Keep track of the current permutation.      
 %    \begin{macrocode}
@@ -1914,6 +1950,31 @@ and the derived files            README.txt,
 %    \end{macrocode}
 % The over-strand is easy as that's a single curve.
 %    \begin{macrocode}
+      \int_set:Nn \l_@@_crossing_start_factor_int {1}
+      \int_set:Nn \l_@@_crossing_end_factor_int {1}
+      \int_compare:nT {
+        \seq_item:Nn \l_@@_crossing_seq {\l_@@_tmpa_int}
+        =
+        \l_@@_crossing_long_int
+      }
+      {
+        \int_set:Nn \l_@@_crossing_start_factor_int {0}
+        \int_set:Nn \l_@@_crossing_end_factor_int {0}
+
+%        \int_compare:nT {
+%          ####1 = \seq_count:N \l_@@_crossing_seq
+%        }
+%        {
+%          \int_set:Nn \l_@@_crossing_end_factor_int {1}
+%        }
+%        \int_compare:nT {
+%          ####1 = 2
+%        }
+%        {
+%          \int_set:Nn \l_@@_crossing_start_factor_int {1}
+%        }
+      }
+
       \tl_put_right:Nx \l_@@_tmpa_tl
       {
         \exp_not:N \@@_lineto:nn
@@ -1924,7 +1985,7 @@ and the derived files            README.txt,
             * \@@_dim_value:n {width}
           }
         }
-        {\fp_eval:n { \l_@@_height_fp + \l_@@_nudge_fp * (\l_@@_tmpa_int == ####1 - 1 ? (####1 == 2 ? 1 : 0) : 1)
+        {\fp_eval:n { \l_@@_height_fp + \l_@@_nudge_fp * \l_@@_crossing_start_factor_int
             + \@@_dim_value:n {height} * (####1 - 2)/(\seq_count:N \l_@@_crossing_seq - 1)
  } }
 
@@ -1932,12 +1993,12 @@ and the derived files            README.txt,
 
         {0}
         {\fp_eval:n { \l_@@_control_fp
-%            * (\l_@@_tmpa_int == ####1 - 1 ? (####1 == 2 ? 1 : 0) : 1)
+%            * \l_@@_crossing_start_factor_int
             * 1/(\seq_count:N \l_@@_crossing_seq - 1)}}
 
         {0}
         {\fp_eval:n {- \l_@@_control_fp
-%            * (\l_@@_tmpa_int == ####1 - 1 ? (####1 == \seq_count:N \l_@@_crossing_seq ? 1 : 0) : 1)
+%            * \l_@@_crossing_end_factor_int
             * 1/(\seq_count:N \l_@@_crossing_seq - 1)}}
 
         {\fp_eval:n
@@ -1950,13 +2011,38 @@ and the derived files            README.txt,
           {
             \l_@@_height_fp
             + \@@_dim_value:n {height} * (####1 - 1)/(\seq_count:N \l_@@_crossing_seq - 1)
-            - \l_@@_nudge_fp * (\l_@@_tmpa_int == ####1 - 1 ? (####1 == \seq_count:N \l_@@_crossing_seq ? 1 : 0) : 1)
+            - \l_@@_nudge_fp * \l_@@_crossing_end_factor_int
           }
         }
       }
 %    \end{macrocode}
 % The under-strand is a bit more complicated as we need to break it in the middle.
 %    \begin{macrocode}
+      \int_set:Nn \l_@@_crossing_start_factor_int {1}
+      \int_set:Nn \l_@@_crossing_end_factor_int {1}
+      \int_compare:nT {
+        \seq_item:Nn \l_@@_crossing_seq {\l_@@_tmpb_int}
+        =
+        \l_@@_crossing_long_int
+      }
+      {
+        \int_set:Nn \l_@@_crossing_start_factor_int {0}
+        \int_set:Nn \l_@@_crossing_end_factor_int {0}
+
+%        \int_compare:nT {
+%          ####1 = \seq_count:N \l_@@_crossing_seq
+%        }
+%        {
+%          \int_set:Nn \l_@@_crossing_end_factor_int {1}
+%        }
+%        \int_compare:nT {
+%          ####1 = 2
+%        }
+%        {
+%          \int_set:Nn \l_@@_crossing_start_factor_int {1}
+%        }
+      }
+
       \tl_put_right:Nx \l_@@_tmpb_tl
       {
         \exp_not:N \@@_lineto:nn
@@ -1967,7 +2053,7 @@ and the derived files            README.txt,
             * \@@_dim_value:n {width}
           }
         }
-        {\fp_eval:n { \l_@@_height_fp + \l_@@_nudge_fp * (\l_@@_tmpb_int == ####1 - 1 ? (####1 == 2 ? 1 : 0) : 1)
+        {\fp_eval:n { \l_@@_height_fp + \l_@@_nudge_fp * \l_@@_crossing_start_factor_int
             + \@@_dim_value:n {height} * (####1 - 2)/(\seq_count:N \l_@@_crossing_seq - 1)
 
         } }
@@ -1977,7 +2063,8 @@ and the derived files            README.txt,
         {0}
         {
           \fp_eval:n {
-            \l_@@_control_fp  * (.5 - \@@_value:n {gap} * (\seq_count:N \l_@@_crossing_seq - 1) ) * 1/(\seq_count:N \l_@@_crossing_seq - 1) * (\l_@@_tmpb_int == ####1 - 1 ? (####1 == 2 ? 1 : 0) : 1)
+            \l_@@_control_fp  * (.5 - \@@_value:n {gap} * (\seq_count:N \l_@@_crossing_seq - 1) ) * 1/(\seq_count:N \l_@@_crossing_seq - 1)
+%            * \l_@@_crossing_start_factor_int
           }
         }
 
@@ -2006,17 +2093,21 @@ and the derived files            README.txt,
             \@@_bezier_tangent:nnnnn
             {.5 - \@@_value:n {gap} * (\seq_count:N \l_@@_crossing_seq - 1) }
             {0}
-            {\l_@@_control_fp * 1/(\seq_count:N \l_@@_crossing_seq - 1)}
+            {
+              \l_@@_control_fp * 1/(\seq_count:N \l_@@_crossing_seq - 1)
+%              * \l_@@_crossing_start_factor_int
+            }
             {
               \@@_dim_value:n {height} * 1/(\seq_count:N \l_@@_crossing_seq - 1)
-              - \l_@@_nudge_fp * (\l_@@_tmpb_int == ####1 - 1 ? (####1 == 2 ? 1 : 0) : 1)
-              - \l_@@_nudge_fp * (\l_@@_tmpb_int == ####1 - 1 ? (####1 == \seq_count:N \l_@@_crossing_seq ? 1 : 0) : 1)
+              - \l_@@_nudge_fp * \l_@@_crossing_start_factor_int
+              - \l_@@_nudge_fp * \l_@@_crossing_end_factor_int
               - \l_@@_control_fp * 1/(\seq_count:N \l_@@_crossing_seq - 1)
+%              * \l_@@_crossing_end_factor_int
             }
             {
               \@@_dim_value:n {height} *  1/(\seq_count:N \l_@@_crossing_seq - 1)
-              - \l_@@_nudge_fp * (\l_@@_tmpb_int == ####1 - 1 ? (####1 == 2 ? 1 : 0) : 1)
-              - \l_@@_nudge_fp * (\l_@@_tmpb_int == ####1 - 1 ? (####1 == \seq_count:N \l_@@_crossing_seq ? 1 : 0) : 1)
+              - \l_@@_nudge_fp * \l_@@_crossing_start_factor_int
+              - \l_@@_nudge_fp * \l_@@_crossing_end_factor_int
             }
           }
         }
@@ -2044,22 +2135,26 @@ and the derived files            README.txt,
         {
           \fp_eval:n {
             \l_@@_height_fp
-            + \l_@@_nudge_fp * (\l_@@_tmpb_int == ####1 - 1 ? (####1 == 2 ? 1 : 0) : 1)
+            + \l_@@_nudge_fp * \l_@@_crossing_start_factor_int
             + \@@_dim_value:n {height} * (####1 - 2)/(\seq_count:N \l_@@_crossing_seq - 1)
             + 
             \@@_bezier_point:nnnnn
             {.5 - \@@_value:n {gap} * (\seq_count:N \l_@@_crossing_seq - 1) }
             {0}
-            {\l_@@_control_fp * 1/(\seq_count:N \l_@@_crossing_seq - 1)}
+            {
+              \l_@@_control_fp * 1/(\seq_count:N \l_@@_crossing_seq - 1)
+%              * \l_@@_crossing_start_factor_int
+            }
             {
               \@@_dim_value:n {height} *  1/(\seq_count:N \l_@@_crossing_seq - 1)
-              - \l_@@_nudge_fp * (\l_@@_tmpb_int == ####1 - 1 ? (####1 == 2 ? 1 : 0) : 1)
-              - \l_@@_nudge_fp * (\l_@@_tmpb_int == ####1 - 1 ? (####1 == \seq_count:N \l_@@_crossing_seq ? 1 : 0) : 1)
+              - \l_@@_nudge_fp * \l_@@_crossing_start_factor_int
+              - \l_@@_nudge_fp * \l_@@_crossing_end_factor_int
               - \l_@@_control_fp * 1/(\seq_count:N \l_@@_crossing_seq - 1)
+%              * \l_@@_crossing_end_factor_int
             }
             {\@@_dim_value:n {height} *  1/(\seq_count:N \l_@@_crossing_seq - 1)
-              - \l_@@_nudge_fp * (\l_@@_tmpb_int == ####1 - 1 ? (####1 == 2 ? 1 : 0) : 1)
-              - \l_@@_nudge_fp * (\l_@@_tmpb_int == ####1 - 1 ? (####1 == \seq_count:N \l_@@_crossing_seq ? 1 : 0) : 1)
+              - \l_@@_nudge_fp * \l_@@_crossing_start_factor_int
+              - \l_@@_nudge_fp * \l_@@_crossing_end_factor_int
             }
           }
         }
@@ -2088,22 +2183,26 @@ and the derived files            README.txt,
         {
           \fp_eval:n {
             \l_@@_height_fp
-            + \l_@@_nudge_fp * (\l_@@_tmpb_int == ####1 - 1 ? (####1 == 2 ? 1 : 0) : 1)
+            + \l_@@_nudge_fp * \l_@@_crossing_start_factor_int
             + \@@_dim_value:n {height} * (####1 - 2)/(\seq_count:N \l_@@_crossing_seq - 1)
             + 
             \@@_bezier_point:nnnnn
             {.5 + \@@_value:n {gap} * (\seq_count:N \l_@@_crossing_seq - 1) }
             {0}
-            {\l_@@_control_fp * 1/(\seq_count:N \l_@@_crossing_seq - 1)}
+            {
+              \l_@@_control_fp * 1/(\seq_count:N \l_@@_crossing_seq - 1)
+%              * \l_@@_crossing_start_factor_int
+            }
             {
               \@@_dim_value:n {height} *  1/(\seq_count:N \l_@@_crossing_seq - 1)
-              - \l_@@_nudge_fp * (\l_@@_tmpb_int == ####1 - 1 ? (####1 == 2 ? 1 : 0) : 1)
-              - \l_@@_nudge_fp * (\l_@@_tmpb_int == ####1 - 1 ? (####1 == \seq_count:N \l_@@_crossing_seq ? 1 : 0) : 1)
+              - \l_@@_nudge_fp * \l_@@_crossing_start_factor_int
+              - \l_@@_nudge_fp * \l_@@_crossing_end_factor_int
               - \l_@@_control_fp * 1/(\seq_count:N \l_@@_crossing_seq - 1)
+%              * \l_@@_crossing_end_factor_int
             }
             {\@@_dim_value:n {height} *  1/(\seq_count:N \l_@@_crossing_seq - 1)
-              - \l_@@_nudge_fp * (\l_@@_tmpb_int == ####1 - 1 ? (####1 == 2 ? 1 : 0) : 1)
-              - \l_@@_nudge_fp * (\l_@@_tmpb_int == ####1 - 1 ? (####1 == \seq_count:N \l_@@_crossing_seq ? 1 : 0) : 1)
+              - \l_@@_nudge_fp * \l_@@_crossing_start_factor_int
+              - \l_@@_nudge_fp * \l_@@_crossing_end_factor_int
             }
           }
         }
@@ -2135,16 +2234,20 @@ and the derived files            README.txt,
             \@@_bezier_tangent:nnnnn
             {.5 + \@@_value:n {gap} * (\seq_count:N \l_@@_crossing_seq - 1) }
             {0}
-            {\l_@@_control_fp * 1/(\seq_count:N \l_@@_crossing_seq - 1)}
+            {
+              \l_@@_control_fp * 1/(\seq_count:N \l_@@_crossing_seq - 1)
+%              * \l_@@_crossing_start_factor_int
+            }
             {
               \@@_dim_value:n {height} *  1/(\seq_count:N \l_@@_crossing_seq - 1)
-              - \l_@@_nudge_fp * (\l_@@_tmpb_int == ####1 - 1 ? (####1 == 2 ? 1 : 0) : 1)
-              - \l_@@_nudge_fp * (\l_@@_tmpb_int == ####1 - 1 ? (####1 == \seq_count:N \l_@@_crossing_seq ? 1 : 0) : 1)
+              - \l_@@_nudge_fp * \l_@@_crossing_start_factor_int
+              - \l_@@_nudge_fp * \l_@@_crossing_end_factor_int
               - \l_@@_control_fp * 1/(\seq_count:N \l_@@_crossing_seq - 1)
+%              * \l_@@_crossing_end_factor_int
             }
             {\@@_dim_value:n {height} *  1/(\seq_count:N \l_@@_crossing_seq - 1)
-              - \l_@@_nudge_fp * (\l_@@_tmpb_int == ####1 - 1 ? (####1 == 2 ? 1 : 0) : 1)
-              - \l_@@_nudge_fp * (\l_@@_tmpb_int == ####1 - 1 ? (####1 == \seq_count:N \l_@@_crossing_seq ? 1 : 0) : 1)
+              - \l_@@_nudge_fp * \l_@@_crossing_start_factor_int
+              - \l_@@_nudge_fp * \l_@@_crossing_end_factor_int
             }
           }
         }
@@ -2152,7 +2255,7 @@ and the derived files            README.txt,
         {0}
         {\fp_eval:n {
             - \l_@@_control_fp  * (.5 - \@@_value:n {gap} * (\seq_count:N \l_@@_crossing_seq - 1) )
-            * (\l_@@_tmpb_int == ####1 - 1 ? (####1 == \seq_count:N \l_@@_crossing_seq ? 1 : 0) : 1)
+%            * \l_@@_crossing_end_factor_int
             * 1/(\seq_count:N \l_@@_crossing_seq - 1)}
         }
 
@@ -2166,7 +2269,7 @@ and the derived files            README.txt,
           {
             \l_@@_height_fp
             + \@@_dim_value:n {height} * (####1 - 1)/(\seq_count:N \l_@@_crossing_seq - 1)
-            - \l_@@_nudge_fp * (\l_@@_tmpb_int == ####1 -1 ? (####1 == \seq_count:N \l_@@_crossing_seq ? 1 : 0) : 1)
+            - \l_@@_nudge_fp * \l_@@_crossing_end_factor_int
           }
         }
         
@@ -2232,15 +2335,17 @@ and the derived files            README.txt,
               {\fp_eval:n
                 {
                   \l_@@_height_fp + \l_@@_nudge_fp
-                  + .5 * \l_@@_control_fp
+                  + .5 * \l_@@_control_fp / (\seq_count:N \l_@@_crossing_seq - 1)
+                  + \@@_dim_value:n {height} * (####1 - 2)/(\seq_count:N \l_@@_crossing_seq - 1)
                 }
               }
               \exp_not:N \@@_moveto:nn
               {\fp_eval:n {(########1 - 1) * \@@_dim_value:n {width} }}
               {\fp_eval:n
                 {
-                  \l_@@_height_fp + \@@_dim_value:n {height}
-                  - \l_@@_nudge_fp - .5 * \l_@@_control_fp
+                  \l_@@_height_fp
+                  - \l_@@_nudge_fp - .5 * \l_@@_control_fp / (\seq_count:N \l_@@_crossing_seq - 1)
+                  + \@@_dim_value:n {height} * (####1 - 1)/(\seq_count:N \l_@@_crossing_seq - 1)
                 }
               }
             }
@@ -2248,6 +2353,32 @@ and the derived files            README.txt,
             \prop_put:NnV \l_@@_strands_prop {########1} \l_@@_tmpa_tl
           }
       }
+%    \end{macrocode}
+% Reset the current long 
+%    \begin{macrocode}
+      \int_compare:nTF
+      {
+        \seq_item:Nn \l_@@_crossing_seq {\l_@@_tmpa_int}
+        =
+        \l_@@_crossing_long_int
+      }
+      {
+        \int_set:Nn \l_@@_crossing_long_int {\seq_item:Nn \l_@@_crossing_seq {\l_@@_tmpb_int}}
+      }
+      {
+      \int_compare:nT
+      {
+        \seq_item:Nn \l_@@_crossing_seq {\l_@@_tmpb_int}
+        =
+        \l_@@_crossing_long_int
+      }
+      {
+        \int_set:Nn \l_@@_crossing_long_int {\seq_item:Nn \l_@@_crossing_seq {\l_@@_tmpa_int}}
+      }
+      
+      }
+%    \end{macrocode}
+%    \begin{macrocode}
       }
     }
 %    \end{macrocode}
@@ -2325,6 +2456,8 @@ and the derived files            README.txt,
 }
 \cs_new_nopar:Npn \@@_curveto:nnnnnn #1#2#3#4#5#6
 {
+%  -- +(5 pt, 0) -- +(0 pt, 0pt)
+%  -- +(#1 pt, #2 pt) -- (#5 pt + #3 pt, #6 pt + #4 pt) -- (#5 pt, #6 pt)
   .. controls +(#1 pt, #2 pt) and +(#3 pt, #4 pt)
   .. (#5 pt, #6 pt)
 }
