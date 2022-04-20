@@ -1250,17 +1250,13 @@ and the derived files            README.txt,
 %    \begin{macrocode}
 \tikzset{
    braid/.pic={
-     code={
-       \@@_parse_word:n {#1}
-       \@@_count:
-       \@@_render:
-     }
+     \@@_parse_word:n {#1}
+     \@@_count:
+     \@@_render:
    },
    floor/.pic={
-     code={
-       \path[pic~ actions, draw=none] (0,0) rectangle (1,1);
-       \path[pic~ actions, fill=none] (0,0) -- (1,0) (0,1) -- (1,1);
-     }
+     \path[pic~ actions, draw=none] (0,0) rectangle (1,1);
+     \path[pic~ actions, fill=none] (0,0) -- (1,0) (0,1) -- (1,1);
    },
    /tikz/braid/.search~ also={/tikz},
    braid/.cd,
