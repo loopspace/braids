@@ -1,0 +1,59 @@
+\documentclass{article}
+\usepackage[svgnames]{xcolor}
+\usepackage{tikz}
+\usetikzlibrary{
+  braids,
+  decorations.markings
+}
+
+\thispagestyle{empty}
+
+
+\begin{document}
+\begin{tikzpicture}[remember picture, overlay]
+\pic[
+  decoration={
+    markings,
+    mark=between positions 2mm and 1 step 5mm with {
+      \draw[black,thick] (-2mm,-1.5mm) .. controls +(4mm,0) and +(-4mm,0) .. (2mm,1.5mm);
+    }
+  },
+  braid/number of strands=10,
+  braid/gap=.15,
+  braid/every strand/.style={
+    line width=3mm,
+    draw,
+    brown!50,
+    postaction={
+      decorate,
+    },
+    preaction={
+      draw,
+      black,
+      line width=3.3mm,
+    }
+  },
+  braid/every floor/.style={
+    draw
+  },
+  braid/height=-3cm,
+  braid/width=2cm,
+  braid/anchor=1-0,
+]
+at ([shift={(2,-2)}]current page.north west)
+{braid={
+    s_1-s_3-s_5^{-1}-s_7^{-1}
+    s_1-s_3-s_5^{-1}-s_7^{-1}
+    s_1-s_3-s_5^{-1}-s_7^{-1}
+    s_1-s_3-s_5^{-1}-s_7^{-1}
+    s_1-s_3-s_5^{-1}-s_7^{-1}
+    s_1-s_3-s_5^{-1}-s_7^{-1}
+    s_1-s_3-s_5^{-1}-s_7^{-1}
+    s_1-s_3-s_5^{-1}-s_7^{-1}
+}};
+\begin{scope}[shift={([shift={(1,-2)}]current page.north west)}]
+\draw (0,0) grid[xstep=4cm,ystep=3cm] ++(20,-24.1);
+\draw (18,0) -- +(0,-24.1);
+\end{scope}
+\end{tikzpicture}
+\end{document}

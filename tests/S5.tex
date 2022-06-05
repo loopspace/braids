@@ -1,0 +1,188 @@
+\documentclass[border=1cm]{standalone}
+%\documentclass{article}
+
+\usepackage{tikz}
+\usetikzlibrary{braids}
+\usepgfmodule{nonlineartransformations}
+
+\thispagestyle{empty}
+
+\pagecolor{black}
+
+\makeatletter
+
+\def\polartransformation{%
+  % \pgf@x will contain the radius
+  % \pgf@y will contain the distance
+  \pgfmathsincos@{\pgf@sys@tonumber\pgf@x}%
+  % pgfmathresultx is now the cosine of radius and
+  % pgfmathresulty is the sine of radius
+%  \advance\pgf@y by \pgf@x\relax
+  \pgf@x=\pgfmathresultx\pgf@y%
+  \pgf@y=\pgfmathresulty\pgf@y%
+}
+
+\makeatother
+
+\def\brunnianbraidword{%
+    s_1
+    s_3
+    s_2^{-1}
+    s_1
+    s_2^{-1}
+    s_3
+    s_2
+    s_3
+    s_2^{-1}
+    s_1^{-1}
+    s_2^{-1}
+    s_3
+    s_1
+    s_3^{-1}
+    s_2
+    s_3^{-1}
+    s_2
+    s_3^{-1}
+    s_1^{-1}
+    s_3
+    s_2
+    s_3^{-1}
+    s_2^{-1}
+    s_3^{-1}
+}  
+
+\def\outerbraidword{%
+    s_1
+    s_3
+    s_2
+    s_1
+    s_2
+    s_3
+    s_2
+    s_3
+    s_2
+    s_1
+    s_2
+    s_3
+    s_1
+    s_3
+    s_2
+    s_3
+    s_2
+    s_3
+    s_1
+    s_3
+    s_2
+    s_3
+    s_2
+    s_3
+}  
+
+\def\alternatingbraidword{%
+    s_1
+    s_3
+    s_2^{-1}
+    s_1
+    s_2^{-1}
+    s_3
+    s_2^{-1}
+    s_3
+    s_2^{-1}
+    s_1
+    s_2^{-1}
+    s_3
+    s_1
+    s_3
+    s_2^{-1}
+    s_3
+    s_2^{-1}
+    s_3
+    s_1
+    s_3
+    s_2^{-1}
+    s_3
+    s_2^{-1}
+    s_3
+}  
+
+\def\structuredbraidword{%
+  s_3
+  s_2^{-1}
+  s_1
+  s_2^{-1}
+  s_1
+  s_2^{-1}
+  s_3
+  s_2^{-1}
+  
+  s_3
+  s_2^{-1}
+  s_1
+  s_2^{-1}
+  s_1
+  s_2^{-1}
+  s_3
+  s_2^{-1}
+  s_3
+  s_2^{-1}
+  s_1
+  s_2^{-1}
+  s_1
+  s_2^{-1}
+  s_3
+  s_2^{-1}
+}  
+
+\def\eternalbraid{
+  s_2^{-1}
+  s_3
+  s_1
+  s_3
+  s_2^{-1}
+  s_3
+  s_1
+  s_3
+  s_2^{-1}
+  s_3
+  s_1
+  s_2^{-1}
+  s_3
+  s_1
+  s_2^{-1}
+  s_1
+  s_3
+  s_1
+  s_2^{-1}
+  s_1
+  s_3
+  s_1
+  s_2^{-1}
+  }
+
+\let\braidword=\eternalbraid
+
+\begin{document}
+
+%\begin{center}
+\begin{tikzpicture}
+\begin{scope}
+\pgftransformnonlinear{\polartransformation}% see above
+\pic[
+  rotate=90,
+  braid/.cd,
+  every strand/.style={line width=6pt,yellow!67},
+  border height=0cm,
+  height=15.7pt,
+  gap=.2,
+  nudge factor=0.01,
+%  strand 1/.style={cyan},
+%  strand 2/.style={magenta!50},
+%  strand 3/.style={yellow},
+%  strand 4/.style={green},
+] at (0,5) {braid/.expand once=\braidword};
+\end{scope}
+
+\end{tikzpicture}
+%\end{center}
+
+\end{document}
