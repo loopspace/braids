@@ -236,9 +236,13 @@ With a \Verb+name prefix+, the coordinate names look like the following:
 The crossing number can also be either \Verb+s+ or \Verb+e+ for the start and end of the strand.
 Note that \Verb+-1-0+ and \Verb+-1-s+ are slightly different in that \Verb+s+ includes the border height.
 
+In addition, if the braid is named then a rectangular node is defined that fits around the whole braid.
+This node is not actually rendered but its anchors can be used afterwards as if it had been.
+
 \DescribeMacro{anchor}
 The key \Verb+anchor+ (in the \Verb+braid+ name space) can be used to shift the braid so that a different part of it is at the specified location.
-It uses the same syntax as the coordinates, except without the \Verb+<name prefix>-+.
+If the argument contains a hyphen then it is assumed to refer to a point on a strand with the same interpretation as the coordinates (except without the \Verb+<name prefix>-+, of course).
+If the argument does not contain a hyphen then it is taken to be an anchor of a surrounding rectangular node (the node might not itself exist -- if the braid isn't named -- but that doesn't affect the positioning).
 In the following example, the braid is shifted so that where the third strand starts the second level is at the position \Verb+(1,1)+
 
 \begin{example}
