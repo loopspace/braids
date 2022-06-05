@@ -8,3 +8,7 @@
 *.idx
 *.ins
 *.out
+*code.tex
+*.png
+*.sty
+*.py
