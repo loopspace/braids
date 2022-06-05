@@ -1556,37 +1556,50 @@ and the derived files            README.txt,
 % Now we step through the braid word again and record the permutations so that we can calculate the overall permutation defined by the braid.
 %
 % We will also figure out our shift from the anchor, so first we need to get some information about the anchor.
+%
+% If the anchor specification has a hyphen then it is of the form strand-level, otherwise it is an anchor as if the whole braid were contained in a rectangular node.  
 %    \begin{macrocode}
   \tl_set:Nx \l_@@_tmpa_tl {\@@_value:n {anchor}}
-  \seq_set_split:NnV \l_@@_anchor_seq {-} \l_@@_tmpa_tl
+  \tl_if_in:NnTF \l_@@_tmpa_tl {-}
+  {
+    \seq_set_split:NnV \l_@@_anchor_seq {-} \l_@@_tmpa_tl
 
-  \tl_set:Nx \l_@@_tmpa_tl {\seq_item:Nn \l_@@_anchor_seq {1}}
-  \tl_if_eq:VnTF \l_@@_tmpa_tl {rev}
-  {
-    \tl_set:Nx \l_@@_anchor_strand_tl {\seq_item:Nn \l_@@_anchor_seq {2}}
-    \tl_set:Nx \l_@@_anchor_level_tl {\seq_item:Nn \l_@@_anchor_seq {3}}
-  }
-  {
-    \tl_set:Nx \l_@@_anchor_strand_tl {\seq_item:Nn \l_@@_anchor_seq {1}}
-    \tl_set:Nx \l_@@_anchor_level_tl {\seq_item:Nn \l_@@_anchor_seq {2}}
-  }
+    \tl_set:Nx \l_@@_tmpa_tl {\seq_item:Nn \l_@@_anchor_seq {1}}
+    \tl_if_eq:VnTF \l_@@_tmpa_tl {rev}
+    {
+      \tl_set:Nx \l_@@_anchor_strand_tl {\seq_item:Nn \l_@@_anchor_seq {2}}
+      \tl_set:Nx \l_@@_anchor_level_tl {\seq_item:Nn \l_@@_anchor_seq {3}}
+    }
+    {
+      \tl_set:Nx \l_@@_anchor_strand_tl {\seq_item:Nn \l_@@_anchor_seq {1}}
+      \tl_set:Nx \l_@@_anchor_level_tl {\seq_item:Nn \l_@@_anchor_seq {2}}
+    }
 %    \end{macrocode}
 % The important information is as to the level at which the requested anchor resides.
 % If it is at the end or start of a strand, we set the level to \(-1\) so that it never matches a level number. 
 %    \begin{macrocode}
-  \tl_if_eq:VnTF \l_@@_anchor_level_tl {s}
-  {
-    \int_set:Nn \l_@@_anchor_level_int {-1}
-  }
-  {
-    \tl_if_eq:VnTF \l_@@_anchor_level_tl {e}
+    \tl_if_eq:VnTF \l_@@_anchor_level_tl {s}
     {
       \int_set:Nn \l_@@_anchor_level_int {-1}
     }
     {
-      \int_set:Nn \l_@@_anchor_level_int
-      {\tl_use:N \l_@@_anchor_level_tl}
+      \tl_if_eq:VnTF \l_@@_anchor_level_tl {e}
+      {
+        \int_set:Nn \l_@@_anchor_level_int {-1}
+      }
+      {
+        \int_set:Nn \l_@@_anchor_level_int
+        {\tl_use:N \l_@@_anchor_level_tl}
+      }
     }
+  }
+  {
+%    \end{macrocode}
+% There wasn't a hyphen in the anchor specification, so assume it's an anchor on a node surrounding the entire braid.
+% For now, set the anchor strand and level to \(-1\).
+%    \begin{macrocode}
+    \int_set:Nn \l_@@_anchor_level_int {-1}
+    \tl_set:Nn \l_@@_anchor_strand_tl {-1}
   }
   
   \int_zero:N \l_@@_crossing_int
@@ -1654,24 +1667,30 @@ and the derived files            README.txt,
   }
 %    \end{macrocode}
 % Now that we have the inverse, we can figure out our anchor.
-% First, see if we requested a strand by its position at the end of the braid.
+% If the strand was recorded as \(-1\), then we want to figure out the position from the braid as a whole so we don't bother with processing.
 %    \begin{macrocode}
-  \tl_set:Nx \l_@@_tmpa_tl {\seq_item:Nn \l_@@_anchor_seq {1}}
-  \tl_if_eq:VnT \l_@@_tmpa_tl {rev}
+  \tl_if_eq:VnF \l_@@_anchor_strand_tl {-1}
   {
-    \prop_get:NVN \l_@@_permutation_prop
-    \l_@@_anchor_strand_tl \l_@@_anchor_strand_tl
-  }
-  \tl_if_eq:VnF \l_@@_anchor_level_tl {s}
-  {
-    \tl_if_eq:VnTF \l_@@_anchor_level_tl {e}
+%    \end{macrocode}
+% Now, see if we requested a strand by its position at the end of the braid.
+%    \begin{macrocode}
+    \tl_set:Nx \l_@@_tmpa_tl {\seq_item:Nn \l_@@_anchor_seq {1}}
+    \tl_if_eq:VnT \l_@@_tmpa_tl {rev}
     {
-      \prop_get:NVN \l_@@_inverse_prop
+      \prop_get:NVN \l_@@_permutation_prop
       \l_@@_anchor_strand_tl \l_@@_anchor_strand_tl
     }
+    \tl_if_eq:VnF \l_@@_anchor_level_tl {s}
     {
-      \prop_get:NVN \l_@@_anchor_prop
-      \l_@@_anchor_strand_tl \l_@@_anchor_strand_tl
+      \tl_if_eq:VnTF \l_@@_anchor_level_tl {e}
+      {
+        \prop_get:NVN \l_@@_inverse_prop
+        \l_@@_anchor_strand_tl \l_@@_anchor_strand_tl
+      }
+      {
+        \prop_get:NVN \l_@@_anchor_prop
+        \l_@@_anchor_strand_tl \l_@@_anchor_strand_tl
+      }
     }
   }
 %    \end{macrocode}
@@ -1709,28 +1728,91 @@ and the derived files            README.txt,
 \cs_new_nopar:Npn \@@_render:
 {
 %    \end{macrocode}
-%
+% Start by figuring out our anchor.
 %    \begin{macrocode}
-  \fp_set:Nn \l_@@_anchor_x_fp { - 1 * (\tl_use:N \l_@@_anchor_strand_tl - 1) * \@@_dim_value:n {width} }
-
-  \tl_if_eq:VnTF \l_@@_anchor_level_tl {s}
+  \tl_if_eq:VnTF \l_@@_anchor_strand_tl {-1}
   {
-    \fp_set:Nn \l_@@_anchor_y_fp {0}
+%    \end{macrocode}
+% The strand is \(-1\) then we're working with the braid as if a node.
+% We'll redefine this node later anyway.
+%    \begin{macrocode}
+    \tl_set:cn {pgf@sh@ns@temporary braid node}{rectangle}
+    \tl_set:cx {pgf@sh@np@temporary braid node}{%
+      \exp_not:N\def
+      \exp_not:N\southwest
+      {
+        \exp_not:N\pgfqpoint
+        {0pt}
+        {0pt}
+      }
+      \exp_not:N\def
+      \exp_not:N\northeast
+      {
+        \exp_not:N\pgfqpoint
+        {
+          \fp_to_dim:n
+          {
+            (\l_@@_strands_int - 1)
+            *
+            abs(\@@_dim_value:n {width})
+          }
+        }
+        {
+          \fp_to_dim:n
+          {
+            \l_@@_length_int * abs(\@@_dim_value:n {height})
+            + 2 * \@@_dim_value:n {border~ height}
+          }
+        }
+      }
+    }%
+    \pgfgettransform\l_@@_tmpa_tl
+    \tl_set:cV {pgf@sh@nt@temporary braid node} \l_@@_tmpa_tl
+    \tl_set:cV {pgf@sh@pi@temporary braid node} \pgfpictureid
+    \pgfpointanchor{temporary braid node} {\@@_value:n {anchor}}
+%    \end{macrocode}
+% Adjustments due to the possibility of negative widths/heights
+%    \begin{macrocode}
+    \fp_set:Nn \l_@@_anchor_x_fp {
+      - \dim_use:c {pgf@x}
+      - (1 - sign(\@@_dim_value:n {width})) / 2
+      * (\l_@@_strands_int - 1)
+      * \@@_dim_value:n {width}
+    }
+    \fp_set:Nn \l_@@_anchor_y_fp {
+      - \dim_use:c {pgf@y}
+      - (1 - sign(\@@_dim_value:n {height})) / 2
+      * (
+      \l_@@_length_int * abs(\@@_dim_value:n {height})
+      + 2 * \@@_dim_value:n {border~ height} 
+      ) * sign(\@@_dim_value:n {height})
+    }
   }
   {
-    \tl_if_eq:VnTF \l_@@_anchor_level_tl {e}
+%    \end{macrocode}
+% The strand is not \(-1\) so we're setting the anchor via strand and level numbers.
+%    \begin{macrocode}
+    \fp_set:Nn \l_@@_anchor_x_fp { - 1 * (\tl_use:N \l_@@_anchor_strand_tl - 1) * \@@_dim_value:n {width} }
+
+    \tl_if_eq:VnTF \l_@@_anchor_level_tl {s}
     {
-      \fp_set:Nn \l_@@_anchor_y_fp {
-        -1 * \l_@@_length_int * \@@_dim_value:n {height}
-        - sign(\@@_dim_value:n {height})
-        * 2 * \@@_dim_value:n {border~ height}
-      }
+      \fp_set:Nn \l_@@_anchor_y_fp {0}
     }
     {
-      \fp_set:Nn \l_@@_anchor_y_fp {
-        -1 * \l_@@_anchor_level_tl * \@@_dim_value:n {height}
-        - sign(\@@_dim_value:n {height})
-        * \@@_dim_value:n {border~ height}
+      \tl_if_eq:VnTF \l_@@_anchor_level_tl {e}
+      {
+        \fp_set:Nn \l_@@_anchor_y_fp {
+          -1 * \l_@@_length_int * \@@_dim_value:n {height}
+          - sign(\@@_dim_value:n {height})
+          * 2 * \@@_dim_value:n {border~ height}
+        }
+      }
+      {
+        \fp_set:Nn \l_@@_anchor_y_fp {
+          -1 * \l_@@_anchor_level_tl * \@@_dim_value:n {height}
+          - sign(\@@_dim_value:n {height})
+          * \@@_dim_value:n {border~ height}
+        }
       }
     }
   }
@@ -1946,30 +2028,30 @@ and the derived files            README.txt,
 %    \end{macrocode}
 % The over-strand is easy as that's a single curve.
 %    \begin{macrocode}
-      \int_set:Nn \l_@@_crossing_start_factor_int {1}
-      \int_set:Nn \l_@@_crossing_end_factor_int {1}
-      \int_compare:nT {
-        \seq_item:Nn \l_@@_crossing_seq {\l_@@_tmpa_int}
-        =
-        \l_@@_crossing_long_int
-      }
-      {
+%      \int_set:Nn \l_@@_crossing_start_factor_int {1}
+%     \int_set:Nn \l_@@_crossing_end_factor_int {1}
+%      \int_compare:nT {
+%        \seq_item:Nn \l_@@_crossing_seq {\l_@@_tmpa_int}
+%        =
+%        \l_@@_crossing_long_int
+%      }
+%      {
         \int_set:Nn \l_@@_crossing_start_factor_int {0}
         \int_set:Nn \l_@@_crossing_end_factor_int {0}
 
-%        \int_compare:nT {
-%          ####1 = \seq_count:N \l_@@_crossing_seq
-%        }
-%        {
-%          \int_set:Nn \l_@@_crossing_end_factor_int {1}
-%        }
-%        \int_compare:nT {
-%          ####1 = 2
-%        }
-%        {
-%          \int_set:Nn \l_@@_crossing_start_factor_int {1}
-%        }
-      }
+        \int_compare:nT {
+          ####1 = \seq_count:N \l_@@_crossing_seq
+        }
+        {
+          \int_set:Nn \l_@@_crossing_end_factor_int {1}
+        }
+        \int_compare:nT {
+          ####1 = 2
+        }
+        {
+          \int_set:Nn \l_@@_crossing_start_factor_int {1}
+        }
+%      }
 
       \tl_put_right:Nx \l_@@_tmpa_tl
       {
@@ -2014,30 +2096,30 @@ and the derived files            README.txt,
 %    \end{macrocode}
 % The under-strand is a bit more complicated as we need to break it in the middle.
 %    \begin{macrocode}
-      \int_set:Nn \l_@@_crossing_start_factor_int {1}
-      \int_set:Nn \l_@@_crossing_end_factor_int {1}
-      \int_compare:nT {
-        \seq_item:Nn \l_@@_crossing_seq {\l_@@_tmpb_int}
-        =
-        \l_@@_crossing_long_int
-      }
-      {
+%      \int_set:Nn \l_@@_crossing_start_factor_int {1}
+%      \int_set:Nn \l_@@_crossing_end_factor_int {1}
+%      \int_compare:nT {
+%        \seq_item:Nn \l_@@_crossing_seq {\l_@@_tmpb_int}
+%        =
+%        \l_@@_crossing_long_int
+%      }
+%      {
         \int_set:Nn \l_@@_crossing_start_factor_int {0}
         \int_set:Nn \l_@@_crossing_end_factor_int {0}
 
-%        \int_compare:nT {
-%          ####1 = \seq_count:N \l_@@_crossing_seq
-%        }
-%        {
-%          \int_set:Nn \l_@@_crossing_end_factor_int {1}
-%        }
-%        \int_compare:nT {
-%          ####1 = 2
-%        }
-%        {
-%          \int_set:Nn \l_@@_crossing_start_factor_int {1}
-%        }
-      }
+        \int_compare:nT {
+          ####1 = \seq_count:N \l_@@_crossing_seq
+        }
+        {
+          \int_set:Nn \l_@@_crossing_end_factor_int {1}
+        }
+        \int_compare:nT {
+          ####1 = 2
+        }
+        {
+          \int_set:Nn \l_@@_crossing_start_factor_int {1}
+        }
+%      }
 
       \tl_put_right:Nx \l_@@_tmpb_tl
       {
@@ -2433,6 +2515,68 @@ and the derived files            README.txt,
   {
     \prop_get:NnN \l_@@_strands_prop {##1} \l_@@_tmpa_tl
     \tl_use:N \l_@@_tmpa_tl
+  }
+%    \end{macrocode}
+% Finally, put a node around the whole braid if it's been named
+%    \begin{macrocode}
+  \tl_if_empty:cF {tikz@fig@name}
+  {
+    \tl_gset:cn {pgf@sh@ns@ \tl_use:c{tikz@fig@name} }{rectangle}
+    \tl_gset:cx {pgf@sh@np@ \tl_use:c{tikz@fig@name} }{%
+      \exp_not:N\def
+      \exp_not:N\southwest
+      {
+        \exp_not:N\pgfqpoint
+        {
+          \fp_to_dim:n
+          {
+            min(0,
+            (\l_@@_strands_int - 1)
+            *
+            (\@@_dim_value:n {width})
+            )
+          }
+        }
+        {
+          \fp_to_dim:n
+          {
+            min(0,
+            \l_@@_length_int * (\@@_dim_value:n {height})
+            + 2 * sign(\@@_dim_value:n {height}) *
+            \@@_dim_value:n {border~ height}
+            )
+          }
+        }
+      }
+      \exp_not:N\def
+      \exp_not:N\northeast
+      {
+        \exp_not:N\pgfqpoint
+        {
+          \fp_to_dim:n
+          {
+            max(0,
+            (\l_@@_strands_int - 1)
+            *
+            (\@@_dim_value:n {width})
+            )
+          }
+        }
+        {
+          \fp_to_dim:n
+          {
+            max(0,
+            \l_@@_length_int * (\@@_dim_value:n {height})
+            + 2 * sign(\@@_dim_value:n {height}) *
+            \@@_dim_value:n {border~ height}
+            )
+          }
+        }
+      }
+    }%
+    \pgfgettransform\l_@@_tmpa_tl
+    \tl_gset:cV {pgf@sh@nt@ \tl_use:c{tikz@fig@name} } \l_@@_tmpa_tl
+    \tl_gset:cV {pgf@sh@pi@ \tl_use:c{tikz@fig@name} } \pgfpictureid
   }
   \end{scope}
 }
