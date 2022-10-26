@@ -35,7 +35,7 @@ See http://www.latex-project.org/lppl.txt
 \endpreamble
 \postamble
 
-Copyright (C) 2011-2019 by Andrew Stacey <loopspace@mathforge.org>
+Copyright (C) 2011-2022 by Andrew Stacey <loopspace@mathforge.org>
 
 This work may be distributed and/or modified under the
 conditions of the LaTeX Project Public License (LPPL), either
@@ -103,7 +103,7 @@ and the derived files            README.txt,
 %</driver>
 % \fi
 %
-% \CheckSum{1949}
+% \CheckSum{2352}
 %
 % \CharacterTable
 %  {Upper-case    \A\B\C\D\E\F\G\H\I\J\K\L\M\N\O\P\Q\R\S\T\U\V\W\X\Y\Z
@@ -1617,22 +1617,25 @@ and the derived files            README.txt,
     {
       \int_step_inline:nnn {2} {\seq_count:N \l_@@_crossing_seq}
       {
+        \int_set:Nn \l_@@_tmpa_int {####1}
+        \int_set:Nn \l_@@_tmpb_int {####1 - 1}
+
         \prop_get:NxN \l_@@_permutation_prop
         {
-          \seq_item:Nn \l_@@_crossing_seq {1}
+          \seq_item:Nn \l_@@_crossing_seq {\l_@@_tmpa_int}
         } \l_@@_tmpa_tl
         \prop_get:NxN \l_@@_permutation_prop
         {
-          \seq_item:Nn \l_@@_crossing_seq {####1}
+          \seq_item:Nn \l_@@_crossing_seq {\l_@@_tmpb_int}
         } \l_@@_tmpb_tl
 
         \prop_put:NxV \l_@@_permutation_prop
         {
-          \seq_item:Nn \l_@@_crossing_seq {####1}
+          \seq_item:Nn \l_@@_crossing_seq {\l_@@_tmpb_int}
         } \l_@@_tmpa_tl
         \prop_put:NxV \l_@@_permutation_prop
         {
-          \seq_item:Nn \l_@@_crossing_seq {1}
+          \seq_item:Nn \l_@@_crossing_seq {\l_@@_tmpa_int}
         } \l_@@_tmpb_tl
       }
     }
@@ -2495,7 +2498,7 @@ and the derived files            README.txt,
   \int_step_inline:nnnn {1} {1} {\l_@@_strands_int}
   {
     \prop_get:NxN \l_@@_strands_prop {##1} \l_@@_tmpa_tl
-    \prop_get:NxN \l_@@_inverse_prop {##1} \l_@@_tmpb_tl
+    \prop_get:NxN \l_@@_permutation_prop {##1} \l_@@_tmpb_tl
 
     \tl_put_right:Nx \l_@@_tmpa_tl {
       \exp_not:N \@@_lineto:nn
