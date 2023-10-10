@@ -112,4 +112,47 @@
 \draw[<-] (braid-rev-1-0) -- +(-3,-1) node[below left] {Strand 1 (reverse) at level 0};
 \fill[purple] (0,0) circle[radius=3mm];
 \end{tikzpicture}
+
+
+\begin{tikzpicture}
+\pic[
+  ultra thick,
+  braid/strand 1/.style={red},
+  braid/strand 2/.style={green},
+  braid/strand 3/.style={blue},
+] {braid={s_1 s_2^{-1} s_1 s_2^{-1}}};
+
+\pic[
+  yscale=-1,
+  ultra thick,
+  braid/strand 1/.style={red},
+  braid/strand 2/.style={green},
+  braid/strand 3/.style={blue},
+] at (4,0) {braid={s_1 s_2^{-1} s_1 s_2^{-1}}};
+\end{tikzpicture}
+
+\begin{tikzpicture}[
+  every braid/.style={
+    ultra thick,
+    braid/strand 1/.style={red},
+    braid/strand 2/.style={green},
+  }
+]
+\pic[
+] at (0,0) {braid={s_1}};
+\pic[
+  braid/height=1cm,
+] at (2,0) {braid={s_1}};
+\pic[
+  braid/crossing height=1cm,
+] at (4,0) {braid={s_1}};
+\pic[
+  braid/crossing height=-1cm,
+] at (6,0) {braid={s_1}};
+\pic[
+  braid/crossing height=-1cm,
+  braid/height=1cm,
+] at (8,0) {braid={s_1}};
+\end{tikzpicture}
+
 \end{document}

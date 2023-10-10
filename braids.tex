@@ -178,8 +178,19 @@ The number of strands will grow according to the terms in the braid word so this
 If not set, the number of strands will be determined by the terms in the braid word.
 
 \DescribeMacro{height}
-The key \Verb+height+ sets the height of the piece of the braid corresponding to an element in the group.
-This can be negative.
+The key \Verb+height+ is used to set the height of the piece of the braid corresponding to a single element in the group.
+This can be negative, and indeed the default value is negative because the default is for a braid to flow down the page.
+
+This key is depreciated and is only kept for backwards compatibility, the following key should be used in its place.
+
+\DescribeMacro{crossing height}
+The key \Verb+crossing height+ also sets the height of the piece of the braid corresponding to an element in the group.
+The sign of this is ignored.
+
+The correct way to get a braid to flow in a different direction to the default is to use a transformation on the \Verb+pic+.
+
+The \Verb+crossing height+ and \Verb+height+ keys shouldn't be used together.
+If they are then a message will be printed on the console and the value for \Verb+crossing height+ will be used.
 
 \DescribeMacro{width}
 The key \Verb+width+ sets the separation of the strands in the braid.
@@ -255,7 +266,7 @@ In the following example, the braid is shifted so that where the third strand st
 \end{example}
 
 
-\section{Examples}
+\subsection{Examples}
 
 Here are more detailed examples.
 
@@ -469,7 +480,7 @@ Anything specified in the \Verb+floor command+ will take precedence over both of
 Any other style options are passed to the underlying TikZ/PGF system and so may influence how the braid is drawn (but note that not all keys make sense due to the implementation).
 
 
-\section{Examples}
+\subsection{Examples}
 
 Here are more detailed examples.
 
