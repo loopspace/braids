@@ -90,6 +90,14 @@ An example follows.
 \end{center}
 \end{example}
 
+This is actually the documentation for two packages: a \emph{package} and a TikZ \emph{library}.
+If your preamble contains \Verb+\usepackage{braids}+ then you are using the package, if \Verb+\usetikzlibrary{braids}+ then the library.
+
+The package was the original version, and then with the advent of \Verb+pic+s I rewrote it as a TikZ library.
+If you are starting afresh then you should use the library, but I recognise that people might have figured out how to get what they want with the old package and don't need to switch.
+So although the original package should be considered \emph{depreciated}, it is not (yet) obsolete.
+I will continue to fix bugs for the original package, but new features only go in the TikZ library.
+
 \section{TikZ Library Usage}
 
 Version 2.0 changed the implementation to use the TikZ \Verb+pic+ syntax.
@@ -187,7 +195,24 @@ This key is depreciated and is only kept for backwards compatibility, the follow
 The key \Verb+crossing height+ also sets the height of the piece of the braid corresponding to an element in the group.
 The sign of this is ignored.
 
-The correct way to get a braid to flow in a different direction to the default is to use a transformation on the \Verb+pic+.
+The correct way to get a braid to flow in a different direction to the default is to use a transformation on the \Verb+pic+, such as in the following example.
+
+\begin{example}
+\begin{tikzpicture}[
+  every braid/.style={
+    ultra thick,
+    braid/strand 1/.style=red,
+    braid/strand 2/.style=green,
+    braid/strand 3/.style=blue,
+    braid/anchor=center,
+    }
+  ]
+\pic {braid={s_1 s_2^{-1}}};
+\pic[rotate=90] at (3,0) {braid={s_1 s_2^{-1}}};
+\pic[rotate=180] at (6,0) {braid={s_1 s_2^{-1}}};
+\pic[yscale=-1] at (9,0) {braid={s_1 s_2^{-1}}};
+\end{tikzpicture}
+\end{example}
 
 The \Verb+crossing height+ and \Verb+height+ keys shouldn't be used together.
 If they are then a message will be printed on the console and the value for \Verb+crossing height+ will be used.
@@ -220,6 +245,10 @@ This key controls how much that ``nudge'' is, as a factor of the \Verb+height+.
 For the aforementioned reason, it should not be set to 0 (the default is 0.05).
 Note that this does not change the height of a crossing.
 Rather, it nudges the height at which the strands start to cross over.
+
+\DescribeMacro{every braid}
+This style is invoked on a scope that surrounds the actual braid.
+It can be used to set defaults for a group of braids.
 
 \DescribeMacro{every strand, strand <n>}
 The style of the strands are controlled by two types of option.
