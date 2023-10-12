@@ -11,9 +11,9 @@ If starting with a fresh document, please consider using the new library instead
 
 ## Usage
 
-- Download the file `braids_code.dtx`.
+- Download the files `braids_code.dtx` and `braids.tex`.
 - To generate the library files, run `tex braids_code.dtx`.
-- To generate the documentation, run `pdflatex tikzmark.dtx`.
+- To generate the documentation, run `pdflatex braids.tex`.
 
 The generated file `tikzlibrarybraids.code.tex` must be in the same directory with the tex file that uses this library.
 (Alternatively, specify some other way that tex uses this version of the library instead of the one included with your tex installation.)
