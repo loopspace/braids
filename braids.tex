@@ -152,7 +152,7 @@ For example, \Verb+s_1-s_3+.
 
 \item To draw a \emph{floor} -- which is a rectangle behind the braid occupying some number of levels (the default being one level) -- precede the braid element by a vertical line, as in \Verb+s_1 | s_2+.
 The floor is itself a pic which, by default, consists of a rectangle and two horizontal lines.
-The rectangle picks up any \Verb+fill+ options and the lines any \Verb+draw+ options that are set in the \Verb+braid/every floor+ and \Verb+braid/floor <n>+ styles.
+The rectangle picks up any \Verb+fill+ options and the lines any \Verb+draw+ options that are set in the \Verb+braid/every floor+ and \Verb+braid/floor <n>+ styles, which are documented below (with an example of changing the pic).
 The \Verb+n+ is the level number, starting at \(1\).
 
 More general floors can be drawn using the key \Verb+braid/add floor+.
@@ -167,6 +167,14 @@ The \Verb+name+ is optional and if given can be used to style the floor in that 
 
 Replacing the floor pic will change how it is drawn.
 The coordinate system is set up for the floor pic so that the floor is a unit square with lower left corner at the origin.
+The default definition is:
+
+\begin{verbatim}
+floor/.pic={
+  \path[pic actions, draw=none] (0,0) rectangle (1,1);
+  \path[pic actions, fill=none] (0,0) -- (1,0) (0,1) -- (1,1);
+}
+\end{verbatim}
 
 \item The identity element can occur in the braid-word.
 It is represented by \Verb+1+.
@@ -180,6 +188,8 @@ However, it takes the same amount of space as if there were a crossing.
 
 There are various keys that change the behaviour or rendering of the braid.
 All of these are in the \Verb+/tikz/braid/+ namespace.
+Many of the examples use the key \Verb+braid/.cd+ to switch to this namespace, meaning that multiple \Verb+braid+ keys can be given without the \Verb+braid+ prefix.
+See the TikZ/pgf documentation for more details on key handling.
 
 \DescribeMacro{number of strands} The key \Verb+number of strands+ sets the minimum number of strands for the braid.
 The number of strands will grow according to the terms in the braid word so this merely sets a lower bound.
@@ -259,6 +269,25 @@ The strands are numbered by their starting position.
 \DescribeMacro{every floor, floor <n>}
 When a floor is requested behind a crossing, it is rendered as a pic.
 These keys control how the floor is styled.
+They can even be used to change the \Verb+pic+ used to draw individual floors.
+
+\begin{example}
+\begin{tikzpicture}
+\pic[
+  braid/floor 1/.style={
+    floor/.pic={
+      \path[pic actions, draw=none] (.5,.5) circle[x radius=.5, y radius=.5];
+      \path[pic actions, fill=none, dashed] (0,0) -- (1,0);
+      \path[pic actions, fill=none, dotted] (0,1) -- (1,1);
+    },
+  },
+  braid/every floor/.style={
+    fill=yellow,
+    draw=black
+  }
+] {braid={| s_1 s_2 | s_1^{-1}}};
+\end{tikzpicture}
+\end{example}
 
 \subsection{Coordinates and Anchors}
 
@@ -266,7 +295,8 @@ The braid is littered with coordinates.
 Each strand gets a coordinate at each end, and at every level between crossings.
 These are labelled and numbered by the initial strand position and the crossing level.
 They are also labelled and numbered by the final strand position with the prefix \Verb+rev+.
-With a \Verb+name prefix+, the coordinate names look like the following:
+If a \Verb+name prefix+\footnote{This is a TikZ key that appends a prefix to every node and pic name in its scope.
+See the TikZ/pgf documentation for more details.} is in place, the coordinate names look like the following:
 %
 \begin{verbatim}
 <name prefix>-<strand number>-<crossing number>
@@ -277,7 +307,26 @@ The crossing number can also be either \Verb+s+ or \Verb+e+ for the start and en
 Note that \Verb+-1-0+ and \Verb+-1-s+ are slightly different in that \Verb+s+ includes the border height.
 
 In addition, if the braid is named then a rectangular node is defined that fits around the whole braid.
-This node is not actually rendered but its anchors can be used afterwards as if it had been.
+This node does not actually exist, so -- for example -- it can't directly be used to draw a border, but TikZ behaves afterwards as if it does exist.
+So in particular its anchors can be used to define locations around the edge of the braid.
+
+\begin{example}
+\begin{tikzpicture}[ultra thick]
+\fill[red] (1,2) circle[radius=3pt];
+\fill[blue] (2,4) circle[radius=3pt];
+\fill[green] (0,0) circle[radius=3pt];
+\pic[
+  braid/.cd,
+  height=-1cm,
+  width=-1cm,
+  anchor=north east,
+] (braid) at (1,2) {braid={1 s_1 s_2 1}};
+\draw[<-,cyan] (braid.east) -- +(1,0) node[right] {east};
+\draw[<-,cyan] (braid.west) -- +(-1,0) node[left] {west};
+\draw[<-,cyan] (braid.north) -- +(0,1) node[above] {north};
+\draw[<-,cyan] (braid.south) -- +(0,-1) node[below] {south};
+\end{tikzpicture}
+\end{example}
 
 \DescribeMacro{anchor}
 The key \Verb+anchor+ (in the \Verb+braid+ name space) can be used to shift the braid so that a different part of it is at the specified location.
