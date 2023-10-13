@@ -85,4 +85,25 @@ They can also be read left-to-right, top-to-bottom, with $s_i$ being an \emph{ov
   ;
 \end{tikzpicture}
 
+The following example combines a name prefix with an anchor.
+It also illustrates crossing height, gap, and a negative width.
+
+\begin{tikzpicture}[ultra thick]
+  \pic[
+  braid/.cd,
+  name prefix=pfx,
+  crossing height=.5cm,
+  gap=.15,
+  width=-1cm,
+  anchor=north east,
+  ] (B) at (1,2) {braid={1 s_1 s_2 1}};
+  \draw[<-,cyan] (pfxB.east) -- +(1,0) node[right] {east};
+  \draw[<-,cyan] (pfxB.west) -- +(-1,0) node[left] {west};
+  \node[at=(pfxB-3-s),pin=north west:strand 3 start] {};
+  \node[at=(pfxB-1-e),pin=north west:strand 1 end] {};
+\end{tikzpicture}
+
+
+
+
 \end{document}
