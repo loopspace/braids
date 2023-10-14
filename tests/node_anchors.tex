@@ -18,8 +18,12 @@ Suggestions/Requests:
 \item (done) use nodes to position braids and $\not =$ sign without specifying absolute coordinates
 \item (done) test: changing width should automatically reposition braids and not let them collide
 \item (done) use nodes to center lower label on each braid, without having to use coordinate calc
-\item (if possible) is there a more straightforward way to do the labeling at the bottom of strands?  I know I could draw the braids in reverse (bottom-to-top), but then I'd have to use $s^{-1}_i$ for each crossing, and that's more annoying to type. 
+\item (if possible) is there a more straightforward way to do the labeling at the bottom of strands?  I know I could draw the braids in reverse (bottom-to-top), but then I'd have to use $s^{-1}_i$ for each crossing, and that's more annoying to type.
+
+\emph{Yes! Prefixing the strand number with \texttt+rev-+ switches the numbering to be from the end.}
 \item (if possible) demonstrate a different floor pic; e.g., an oval or a rectangle with rounded corners, possibly with different line styles on different edges
+
+\emph{Example shown in the code.}
 \end{itemize}
 \ \\
 
@@ -49,7 +53,16 @@ These braids are drawn so that the right-to-left composition order is read botto
   strandstyles,
   name prefix=br-,
   add floor={1,4,3,2,twist},
-  floor twist/.style={draw,fill=red!20!white},
+  floor twist/.style={
+    draw=red!80!white,
+    fill=red!20!white,
+    % This redefines the floor pic just for this floor, to redefined them more generally then move this definition to a higher scope.
+    floor/.pic={
+      \path[pic actions, draw=none, rounded corners] (0,0) rectangle (1,1);
+      \path[pic actions, fill=none, shorten >=5pt, shorten <=5pt] (0,0) -- (1,0);
+      \path[pic actions, fill=none, shorten >=5pt, shorten <=5pt, dashed] (0,1) -- (1,1);
+    }
+  }
   ] (A) at (0,0) {braid={s_2 s_1 s_3 | 1 s_2 s_2}};
   
   \pic[
@@ -58,16 +71,17 @@ These braids are drawn so that the right-to-left composition order is read botto
   ] (B) at ($(br-A.north east)+(2,0)$) {braid={1 s_2 1 s_1-s_3 1 1}};
 
 
-  % br-A labeling from bottom; is there a less confusing way?
-  \foreach \x/\y/\z in {1/a/2,2/b/4,3/a/1,4/b/3}
+% br-A labeling from bottom; is there a less confusing way?
+% Yes!  This is what the `rev-` prefix does.
+  \foreach \y/\z in {a/2,b/4,a/1,b/3}
   \draw
-  (br-A-\x-e) ++(0,-.5ex) node[text height=.6cm] {$\y$}
+  (br-A-rev-\z-e) ++(0,-.5ex) node[text height=.6cm] {$\y$}
   +(0,-3.5ex) node {$\scriptstyle \z$}
   ;
   % br-B labeling from bottom
-  \foreach \x/\y/\z in {1/a/2,2/b/4,3/a/1,4/b/3}
+  \foreach \y/\z in {a/2,b/4,a/1,b/3}
   \draw
-  (br-B-\x-e) ++(0,-.5ex) node[text height=.6cm] {$\y$}
+  (br-B-rev-\z-e) ++(0,-.5ex) node[text height=.6cm] {$\y$}
   +(0,-3.5ex) node {$\scriptstyle \z$}
   ;
 
