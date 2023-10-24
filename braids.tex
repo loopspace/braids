@@ -151,7 +151,10 @@ The usual syntax for this is as follows:
 The \Verb+braid-word+ is an expression in the braid group, such as \Verb+s_1 s_2^{-1} s_{3,5}+.
 The generator labels are not significant.
 
-The subscript determines how the strands cross, as follows:
+The subscript and superscript determine how the strands cross.
+The following describes the default behaviour and is written from the viewpoint that the braid flows down the page.
+This default behaviour can be reversed by using the \Verb+set crossings+ or \Verb+flip crossings+ keys (described in a moment).
+%
 \begin{enumerate}
 \item If the subscript is a single number, as in \Verb+s_2+, the crossing goes from that number over the next.
 \item If the subscript is two or more numbers separated by a comma, as in \Verb+s_{2,4}+ or \Verb+s_{1,3,5}+, imagine holding the numbered strands and moving each to the position of the next with the last strand moving under the others to where the first stands.
@@ -212,6 +215,29 @@ This inserts the identity which corresponds to no crossing.
 However, it takes the same amount of space as if there were a crossing.
 
 \end{enumerate}
+
+The crossing behaviour can be modified by use of one of the following keys.
+Both are in the \Verb+/tikz/braid/+ namespace.
+
+\DescribeMacro{set crossings} The key \Verb+set crossings+ can be used to set the default behaviour of a braid element such as \Verb+s_1+.
+If set to \Verb+over+ then \Verb+s_1+ is strand one going over strand two, when viewed as going down the page.
+If set to \Verb+under+ then \Verb+s_1+ is strand one going under strand two, when viewed as going down the page.
+Alternative options are \Verb+down+ as a synonym for \Verb+over+ and \Verb+up+ for \Verb+under+.
+
+This switch propagates to superscripts, so that \Verb+s_1^{-1}+ should then be viewed as inverting the default behaviour.
+
+\DescribeMacro{flip crossings} This key toggles the default behaviour of crossings.
+
+\begin{example}
+\begin{tikzpicture}[
+  braid/.cd,
+  strand 1/.style={red},
+  strand 1/.style={blue},
+]
+\pic at (0,0) {braid={s_1}};
+\pic[braid/set crossings=under] at (2,0) {braid={s_1}};
+\end{tikzpicture}
+\end{example}
 
 \subsection{Style Options}
 \label{sec:picstyleopts}

@@ -1,0 +1,32 @@
+\RequirePackage{shellesc}
+\immediate\write18{cd ..; tex braids_code.dtx}
+\documentclass{article}
+
+\usepackage{tikz}
+\usetikzlibrary{braids}
+
+\begin{document}
+
+\begin{tikzpicture}
+\pic[
+  braid/.cd,
+  strand 1/.style={red},
+] (braid) at (1,2) {braid={s_1 s_2^{-1} s_1^1}};
+\pic[
+  braid/.cd,
+  flip crossings,
+  strand 1/.style={red},
+] (braid) at (4,2) {braid={s_1 s_2^{-1} s_1^1}};
+\pic[
+  braid/.cd,
+  set crossings=over,
+  strand 1/.style={red},
+] (braid) at (7,2) {braid={s_1 s_2^{-1} s_1^1}};
+\pic[
+  braid/.cd,
+  set crossings=under,
+  strand 1/.style={red},
+] (braid) at (10,2) {braid={s_1 s_2^{-1} s_1^1}};
+\end{tikzpicture}
+
+\end{document}

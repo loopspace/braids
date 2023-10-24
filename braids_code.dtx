@@ -1227,18 +1227,10 @@ and the derived files            README.txt,
 \seq_new:N \l_@@_anchor_seq
 \seq_new:N \l_@@_floors_seq
 \str_new:N \l_@@_tmpa_str
-\str_new:N \l_@@_sup_str
-\str_set:Nn \l_@@_sup_str {^}
-\str_new:N \l_@@_sub_str
-\str_set:Nn \l_@@_sub_str {_}
-\str_new:N \l_@@_hyphen_str
-\str_set:Nn \l_@@_hyphen_str {-}
-\str_new:N \l_@@_bar_str
-\str_set:Nn \l_@@_bar_str {|}
-\str_new:N \l_@@_one_str
-\str_set:Nn \l_@@_one_str {1}
 \bool_new:N \l_@@_step_level_bool
 \bool_new:N \l_@@_swap_crossing_bool
+\bool_new:N \l_@@_default_crossing_bool
+\bool_set_true:N \l_@@_default_crossing_bool
 \bool_new:N \l_@@_floor_bool
 \bool_new:N \l_@@_height_bool
 \bool_new:N \l_@@_crossing_height_bool
@@ -1249,6 +1241,7 @@ and the derived files            README.txt,
 \prop_new:N \l_@@_anchor_prop
 \msg_new:nnn {braids} {height} {The~ keys~ "height"~ and~ "crossing~ height"~ shouldn't~ be~ used~ together~ (the~ setting~ for~ "crossing~ height"~ will~ be~ used)}
 \cs_generate_variant:Nn \seq_set_split:Nnn {NVn}
+\cs_generate_variant:Nn \str_compare:nNnTF {VNnTF}
 %    \end{macrocode}
 % Our interface is through a TikZ pic.
 %    \begin{macrocode}
@@ -1281,6 +1274,30 @@ and the derived files            README.txt,
 %    \begin{macrocode}
    number~ of~ strands/.initial=0,
 %    \end{macrocode}
+%
+%    \begin{macrocode}
+   set~ crossings/.is~choice,
+   set~ crossings/over/.code={
+     \bool_set_true:N \l_@@_default_crossing_bool
+   },
+   set~ crossings/down/.code={
+     \bool_set_true:N \l_@@_default_crossing_bool
+   },
+   set~ crossings/under/.code={
+     \bool_set_false:N \l_@@_default_crossing_bool
+   },
+   set~ crossings/up/.code={
+     \bool_set_false:N \l_@@_default_crossing_bool
+   },
+   set~ crossings/.default=over,
+%    \end{macrocode}
+%
+%    \begin{macrocode}
+   flip~ crossings/.code={
+     \bool_set_inverse:N \l_@@_default_crossing_bool
+   },
+%    \end{macrocode}
+%
 % The next two keys are used to control the separation between the crossings.
 % The original braid package used the \Verb+height+ as part of how it determined the direction of the braid on the page.
 % In particular, the \Verb+height+ could be negative, and indeed the default is for it to be so since a vertical braid usually flows from top to bottom.
@@ -1497,7 +1514,7 @@ and the derived files            README.txt,
   {
     \seq_put_right:Nx \l_@@_crossing_seq {\int_eval:n {#1 + 1} }
   }
-  \bool_if:NF \l_@@_swap_crossing_bool
+  \bool_xor:nnT {\l_@@_swap_crossing_bool} {\l_@@_default_crossing_bool}
   {
     \seq_reverse:N \l_@@_crossing_seq
   }
@@ -1506,7 +1523,7 @@ and the derived files            README.txt,
 % \end{macro}
 %
 % \begin{macro}{\@@_parse_exponent:n}
-% Parse an exponent, basically testing to see if it is \(-1\) in which case our crossing numbers should be reversed..
+% Parse an exponent, basically testing to see if it is \(-1\) in which case our crossing numbers should be reversed.
 %    \begin{macrocode}
 \cs_new_nopar:Npn \@@_parse_exponent:n #1
 {
