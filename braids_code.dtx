@@ -1514,7 +1514,10 @@ and the derived files            README.txt,
   {
     \seq_put_right:Nx \l_@@_crossing_seq {\int_eval:n {#1 + 1} }
   }
-  \bool_xor:nnT {\l_@@_swap_crossing_bool} {\l_@@_default_crossing_bool}
+  \bool_xor:nnT {\l_@@_swap_crossing_bool} {\c_true_bool}
+%    \end{macrocode}
+% Consider a flag here to invert the meaning of each braid group element, eg \Verb+{\l_@@_default_crossing_bool}+
+%    \begin{macrocode}
   {
     \seq_reverse:N \l_@@_crossing_seq
   }
@@ -2058,8 +2061,15 @@ and the derived files            README.txt,
 %    \begin{macrocode}
       \int_step_inline:nnn {2} {\seq_count:N \l_@@_crossing_seq}
       {
-        \int_set:Nn \l_@@_tmpa_int {####1}
-        \int_set:Nn \l_@@_tmpb_int {####1 - 1}
+        \bool_if:NTF \l_@@_default_crossing_bool
+        {
+          \int_set:Nn \l_@@_tmpa_int {####1}
+          \int_set:Nn \l_@@_tmpb_int {####1 - 1}
+        }
+        {
+          \int_set:Nn \l_@@_tmpa_int {####1 - 1}
+          \int_set:Nn \l_@@_tmpb_int {####1}
+        }
 %    \end{macrocode}
 % Keep track of the current permutation.      
 %    \begin{macrocode}
