@@ -3,9 +3,10 @@
 \usepackage{lmodern}
 \usepackage{morefloats}
 \usepackage{tikz}
-\usepackage{braids}
+\usepackage[nowarning]{braids}
 \usetikzlibrary{
   braids,
+  calc,
   decorations.markings
 }
 \usepackage[numbered]{hypdoc}
@@ -153,7 +154,7 @@ The generator labels are not significant.
 
 The subscript and superscript determine how the strands cross.
 The following describes the default behaviour and is written from the viewpoint that the braid flows down the page.
-This default behaviour can be reversed by using the \Verb+set crossings+ or \Verb+flip crossings+ keys (described in a moment).
+This default behaviour can be altered by using the \Verb+crossing convention+ or \Verb+flip crossing convention+ keys (described in a moment).
 %
 \begin{enumerate}
 \item If the subscript is a single number, as in \Verb+s_2+, the crossing goes from that number over the next.
@@ -217,25 +218,35 @@ However, it takes the same amount of space as if there were a crossing.
 \end{enumerate}
 
 The crossing behaviour can be modified by use of one of the following keys.
-Both are in the \Verb+/tikz/braid/+ namespace.
+All are in the \Verb+/tikz/braid/+ namespace.
 
-\DescribeMacro{set crossings} The key \Verb+set crossings+ can be used to set the default behaviour of a braid element such as \Verb+s_1+.
-If set to \Verb+over+ (the default) then \Verb+s_1+ is strand one going over strand two, when viewed as going down the page.
-If set to \Verb+under+ then \Verb+s_1+ is strand one going under strand two, when viewed as going down the page.
-Alternative options are \Verb+down+ as a synonym for \Verb+over+ and \Verb+up+ for \Verb+under+.
+\DescribeMacro{crossing convention, flip crossing convention, set symbols, flip symbols} These keys determine the behaviour of the braid symbols.
+Both \Verb+crossing convention+ and \Verb+set symbols+ take an option, which is one of \Verb+over+, \Verb+under+, \Verb+down+, or \Verb+up+; in this list \Verb+over+ and \Verb+down+ are synonyms, as are \Verb+under+ and \Verb+up+.
+Then \Verb+flip crossing convention+ and \Verb+flip symbols+ reverses the current behaviour of the corresponding setting key.
 
-This switch propagates to superscripts, so that \Verb+s_1^{-1}+ should then be viewed as inverting the default behaviour.
+These have similar but not identical behaviours.
+The \Verb+crossing convention+ keys set whether the standard crossings are over or under (\Verb+down+ and \Verb+up+ are synonyms for if you prefer to think of the braid as travelling down or up the page).
+The \Verb+set symbols+ keys can be used to invert the braid element represented by each symbol.
 
-\DescribeMacro{flip crossings} This key toggles the default behaviour of crossings.
+For the generators, such as \(s_1\), these have the same effect since \(s_1^{-1}\) is obtained from \(s_1\) by swapping the crossing type.
+But for the other symbols, such as \(s_{1-4}\), then these achieve different things.
+With the \Verb+crossing convention+ set to \Verb+under+ then \(s_{1-4}\) still moves each strand to the right.
+But with \Verb+set symbols+ set to \Verb+under+ then each strand now moves to the left.
+
+Any strands not involved in the crossing, for example strands \(2\) and \(3\) in \(s_{1,4}\), stay behind the crossing regardless of these settings.
+This is partially because implementing them as over strands is more complicated to code, and partially because the idea of \(s_{1,4}\) is that strands \(2\) and \(3\) are not involved.
 
 \begin{example}
 \begin{tikzpicture}[
   braid/.cd,
   strand 1/.style={red},
-  strand 2/.style={blue},
+  strand 2/.style={green},
+  strand 3/.style={blue},
+  strand 4/.style={magenta},
 ]
-\pic at (0,0) {braid={s_1}};
-\pic[braid/set crossings=under] at (2,0) {braid={s_1}};
+\pic at (0,0) {braid={s_1 s_{1-4} s_{1,3,4}}};
+\pic[braid/crossing convention=under] at (4,0) {braid={s_1 s_{1-4} s_{1,3,4}}};
+\pic[braid/set symbols=under] at (8,0) {braid={s_1 s_{1-4} s_{1,3,4}}};
 \end{tikzpicture}
 \end{example}
 
@@ -313,6 +324,39 @@ This key controls how much that ``nudge'' is, as a factor of the \Verb+height+.
 For the aforementioned reason, it should not be set to 0 (the default is 0.05).
 Note that this does not change the height of a crossing.
 Rather, it nudges the height at which the strands start to cross over.
+
+\bigskip
+
+The following example illustrates the above keys.
+
+\begin{example}
+\begin{tikzpicture}
+\pic[
+  draw,
+  ultra thick,
+  magenta,
+  braid/.cd,
+  border height=3mm,
+  nudge factor=.2,
+  gap=.3
+] (lengths) {braid={s_1 s_2}};
+\draw (lengths-1-s) -- +(-1,0) coordinate (a);
+\draw (lengths-1-0) -- +(-1,0) coordinate (b);
+\draw (lengths-3-1) -- +(1,0) coordinate (c);
+\draw (lengths-1-2) -- +(1,0) coordinate (d);
+\draw (lengths-1-s) -- +(0,1) coordinate (e);
+\draw (lengths-2-s) -- +(0,1) coordinate (f);
+\draw (lengths-2-1) -- +(-1,0) coordinate (g);
+\draw ($(lengths-2-1)!.2!(lengths-1-0)$) -- +(-1,0) coordinate (h);
+\draw (lengths-1-1) -- +(.5,0) coordinate (i);
+\draw ($(lengths-1-1)!.5!(lengths-2-0)$) -- +(.5,0) coordinate (j);
+\draw[|<->|] (a) -- node[left] {border height} (b);
+\draw[|<->|] (c) -- node[right] {crossing height} (d);
+\draw[|<->|] (e) -- node[above] {width} (f);
+\draw[|<->|] (g) -- node[left] {nudge factor} (h);
+\draw[|<->|] (i) -- node[right] {control factor} (j);
+\end{tikzpicture}
+\end{example}
 
 \DescribeMacro{every braid}
 This style is invoked on a scope that surrounds the actual braid.
@@ -629,6 +673,14 @@ To use this package, you need to put the following in the preamble.
 \begin{verbatim}
 \usepackage{braids}
 \end{verbatim}
+
+This will generate a warning saying that it is preferable to use the TikZ library version.
+To suppress this warning use the \Verb+nowarning+ option: 
+
+\begin{verbatim}
+\usepackage[nowarning]{braids}
+\end{verbatim}
+
 
 \DescribeMacro{\braid}
 A braid is specified by the command \Verb+\braid+.

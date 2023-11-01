@@ -162,9 +162,19 @@ and the derived files            README.txt,
 %
 % Issue a notice that this is a depreciated version of the braids package.
 %    \begin{macrocode}
+\newif\if@braids@warning@
+\@braids@warning@true
+\DeclareOption{nowarning}{%
+\@braids@warning@false
+}
+
+\ProcessOptions
+
+\if@braids@warning@
 \PackageWarning{braids}{%
   This package has been reimplemented as a TikZ library; if starting with a fresh document, please consider using that instead.%
 }%
+\fi
 %    \end{macrocode}
 %
 % \begin{macro}[internal]{\ge@addto@macro}
@@ -1230,7 +1240,9 @@ and the derived files            README.txt,
 \bool_new:N \l_@@_step_level_bool
 \bool_new:N \l_@@_swap_crossing_bool
 \bool_new:N \l_@@_default_crossing_bool
+\bool_new:N \l_@@_default_symbol_bool
 \bool_set_true:N \l_@@_default_crossing_bool
+\bool_set_true:N \l_@@_default_symbol_bool
 \bool_new:N \l_@@_floor_bool
 \bool_new:N \l_@@_height_bool
 \bool_new:N \l_@@_crossing_height_bool
@@ -1275,26 +1287,51 @@ and the derived files            README.txt,
    number~ of~ strands/.initial=0,
 %    \end{macrocode}
 %
+% These keys determine whether crossings are over or under by default.
 %    \begin{macrocode}
-   set~ crossings/.is~choice,
-   set~ crossings/over/.code={
+   crossing~ convention/.is~choice,
+   crossing~ convention/over/.code={
      \bool_set_true:N \l_@@_default_crossing_bool
    },
-   set~ crossings/down/.code={
+   crossing~ convention/down/.code={
      \bool_set_true:N \l_@@_default_crossing_bool
    },
-   set~ crossings/under/.code={
+   crossing~ convention/under/.code={
      \bool_set_false:N \l_@@_default_crossing_bool
    },
-   set~ crossings/up/.code={
+   crossing~ convention/up/.code={
      \bool_set_false:N \l_@@_default_crossing_bool
    },
-   set~ crossings/.default=over,
+   crossing~ convention/.default=over,
 %    \end{macrocode}
 %
 %    \begin{macrocode}
-   flip~ crossings/.code={
+   flip~ crossing~ convention/.code={
      \bool_set_inverse:N \l_@@_default_crossing_bool
+   },
+%    \end{macrocode}
+%
+% These keys determine whether elements should be inverted by default.
+%    \begin{macrocode}
+   set~ symbols/.is~choice,
+   set~ symbols/over/.code={
+     \bool_set_true:N \l_@@_default_symbol_bool
+   },
+   set~ symbols/down/.code={
+     \bool_set_true:N \l_@@_default_symbol_bool
+   },
+   set~ symbols/under/.code={
+     \bool_set_false:N \l_@@_default_symbol_bool
+   },
+   set~ symbols/up/.code={
+     \bool_set_false:N \l_@@_default_symbol_bool
+   },
+   set~ symbols/.default=over,
+%    \end{macrocode}
+%
+%    \begin{macrocode}
+   flip~ symbols/.code={
+     \bool_set_inverse:N \l_@@_default_symbol_bool
    },
 %    \end{macrocode}
 %
@@ -1514,10 +1551,7 @@ and the derived files            README.txt,
   {
     \seq_put_right:Nx \l_@@_crossing_seq {\int_eval:n {#1 + 1} }
   }
-  \bool_xor:nnT {\l_@@_swap_crossing_bool} {\c_true_bool}
-%    \end{macrocode}
-% Consider a flag here to invert the meaning of each braid group element, eg \Verb+{\l_@@_default_crossing_bool}+
-%    \begin{macrocode}
+  \bool_xor:nnT {\l_@@_swap_crossing_bool} {\l_@@_default_symbol_bool}
   {
     \seq_reverse:N \l_@@_crossing_seq
   }
