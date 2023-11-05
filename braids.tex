@@ -222,6 +222,7 @@ All are in the \Verb+/tikz/braid/+ namespace.
 
 \DescribeMacro{crossing convention, flip crossing convention, set symbols, flip symbols} These keys determine the behaviour of the braid symbols.
 Both \Verb+crossing convention+ and \Verb+set symbols+ take an option, which is one of \Verb+over+, \Verb+under+, \Verb+down+, or \Verb+up+; in this list \Verb+over+ and \Verb+down+ are synonyms, as are \Verb+under+ and \Verb+up+.
+The default for both is \Verb+over+.
 Then \Verb+flip crossing convention+ and \Verb+flip symbols+ reverses the current behaviour of the corresponding setting key.
 
 These have similar but not identical behaviours.
@@ -232,6 +233,23 @@ For the generators, such as \(s_1\), these have the same effect since \(s_1^{-1}
 But for the other symbols, such as \(s_{1-4}\), then these achieve different things.
 With the \Verb+crossing convention+ set to \Verb+under+ then \(s_{1-4}\) still moves each strand to the right.
 But with \Verb+set symbols+ set to \Verb+under+ then each strand now moves to the left.
+
+To see the effect of these options, consider \(s_{1,2,3}\).
+The equivalences of this, as a braid element, under the various options is in  Table~\ref{tab:overunder}.
+
+\begin{table}
+\begin{center}
+\begin{tabular}{lcc}
+Defaults & \(s_2 s_1\) & \tikz[baseline=(defaults.east)]{ \pic[scale=.5,draw,thin] (defaults) {braid={s_{1-3}}}; \path (defaults.south) +(0,-.1); } \\
+\Verb+crossing convention=under+ & \(s_2^{-1} s_1^{-1}\) & \tikz[baseline=(convention.east)]{ \pic[scale=.5,draw,thin,braid/crossing convention=under] (convention) {braid={s_{1-3}}}; \path (convention.south) +(0,-.1); } \\
+\Verb+set symbols=under+ & \(s_1^{-1} s_2^{-1}\)  & \tikz[baseline=(symbols.east)]{ \pic[scale=.5,draw,thin,braid/set symbols=under] (symbols) {braid={s_{1-3}}}; \path (symbols.south) +(0,-.1); }\\
+\end{tabular}
+\caption{Equivalences of \(s_{1,2,3}\)}
+\label{tab:overunder}
+\end{center}
+
+\end{table}
+
 
 Any strands not involved in the crossing, for example strands \(2\) and \(3\) in \(s_{1,4}\), stay behind the crossing regardless of these settings.
 This is partially because implementing them as over strands is more complicated to code, and partially because the idea of \(s_{1,4}\) is that strands \(2\) and \(3\) are not involved.
