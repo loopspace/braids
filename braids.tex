@@ -190,7 +190,7 @@ The rectangle picks up any \Verb+fill+ options and the lines any \Verb+draw+ opt
 The \Verb+n+ is the level number, starting at \(1\).
 
 More general floors can be drawn using the key \Verb+braid/add floor+.
-This takes one argument which is a comma separated list of parameters that specifies the position and size floor:
+This takes one argument which is a comma separated list of parameters that specifies the position and size of the floor:
 %
 \begin{verbatim}
 braid/add floor={x,y,width,height,name}
@@ -221,21 +221,22 @@ The crossing behaviour can be modified by use of one of the following keys.
 All are in the \Verb+/tikz/braid/+ namespace.
 
 \DescribeMacro{crossing convention, flip crossing convention, set symbols, flip symbols} These keys determine the behaviour of the braid symbols.
-Both \Verb+crossing convention+ and \Verb+set symbols+ take an option, which is one of \Verb+over+, \Verb+under+, \Verb+down+, or \Verb+up+; in this list \Verb+over+ and \Verb+down+ are synonyms, as are \Verb+under+ and \Verb+up+.
+Both \Verb+crossing convention+ and \Verb+set symbols+ take an option, which is one of \Verb+over+, \Verb+under+, \Verb+down+, or \Verb+up+; in this list \Verb+over+ and \Verb+down+ are synonyms for each other, as are \Verb+under+ and \Verb+up+.
 The default for both is \Verb+over+.
 Then \Verb+flip crossing convention+ and \Verb+flip symbols+ reverses the current behaviour of the corresponding setting key.
 
 These have similar but not identical behaviours.
-The \Verb+crossing convention+ keys set whether the standard crossings are over or under (\Verb+down+ and \Verb+up+ are synonyms for if you prefer to think of the braid as travelling down or up the page).
+The \Verb+crossing convention+ keys set whether the standard crossings are over or under (the alternatives, \Verb+down+ and \Verb+up+, are based on visualising the braid as travelling down or up the page).
 The \Verb+set symbols+ keys can be used to invert the braid element represented by each symbol.
 
 For the generators, such as \(s_1\), these have the same effect since \(s_1^{-1}\) is obtained from \(s_1\) by swapping the crossing type.
-But for the other symbols, such as \(s_{1-4}\), then these achieve different things.
-With the \Verb+crossing convention+ set to \Verb+under+ then \(s_{1-4}\) still moves each strand to the right.
-But with \Verb+set symbols+ set to \Verb+under+ then each strand now moves to the left.
+But for the other symbols, such as \(s_{1-3}\), then these achieve different things.
+With the \Verb+crossing convention+ set to \Verb+under+ then \(s_{1-3}\) still moves strands \(1\) and \(2\) to the right.
+But with \Verb+set symbols+ set to \Verb+under+ then these strands now move to the left.
 
-To see the effect of these options, consider \(s_{1,2,3}\).
+To see the effect of these options, consider \(s_{1-3}\).
 The equivalences of this, as a braid element, under the various options is in  Table~\ref{tab:overunder}.
+In this table each row corresponds to a different setting while the central column gives how to achieve the same result as \(s_{1-3}\) but with the default settings.
 
 \begin{table}
 \begin{center}
@@ -243,8 +244,9 @@ The equivalences of this, as a braid element, under the various options is in  T
 Defaults & \(s_2 s_1\) & \tikz[baseline=(defaults.east)]{ \pic[scale=.5,draw,thin] (defaults) {braid={s_{1-3}}}; \path (defaults.south) +(0,-.1); } \\
 \Verb+crossing convention=under+ & \(s_2^{-1} s_1^{-1}\) & \tikz[baseline=(convention.east)]{ \pic[scale=.5,draw,thin,braid/crossing convention=under] (convention) {braid={s_{1-3}}}; \path (convention.south) +(0,-.1); } \\
 \Verb+set symbols=under+ & \(s_1^{-1} s_2^{-1}\)  & \tikz[baseline=(symbols.east)]{ \pic[scale=.5,draw,thin,braid/set symbols=under] (symbols) {braid={s_{1-3}}}; \path (symbols.south) +(0,-.1); }\\
+Both & \(s_1 s_2\)  & \tikz[baseline=(symbols.east)]{ \pic[scale=.5,draw,thin,braid/set symbols=under, braid/crossing convention=under] (symbols) {braid={s_{1-3}}}; \path (symbols.south) +(0,-.1); }\\
 \end{tabular}
-\caption{Equivalences of \(s_{1,2,3}\)}
+\caption{Equivalences of \(s_{1-3}\)}
 \label{tab:overunder}
 \end{center}
 
