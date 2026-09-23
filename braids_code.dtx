@@ -4,14 +4,17 @@
 %</internal>
 %<*readme>
 ----------------------------------------------------------------
-braids --- a style file for drawing braid diagrams with TikZ/PGF
-E-mail: loopspace@mathforge.org
+braids --- a TikZ library for drawing braid diagrams
+bundle version: v2.3 2024/01/09
+E-mail: Andrew Stacey <loopspace@mathforge.org>
 Released under the LaTeX Project Public License v1.3c or later
 See http://www.latex-project.org/lppl.txt
 ----------------------------------------------------------------
 
-This package defines some commands for drawing braid diagrams with TikZ/PGF.
-The initial idea of this package came from a question and answer on the site http://tex.stackexchange.com.
+This library defines some commands for drawing braid diagrams with TikZ/PGF.
+The initial idea of this package came from a question and answer on the site https://tex.stackexchange.com.
+
+The package comes in two versions: a package (braids.sty) and a TikZ library (tikzlibrarybraids.code.tex).  The original package (braids.sty) is depreciated and has been frozen at version 1.1.  The TikZ library is maintained and should be used in preference, except for legacy code.
 %</readme>
 %<*internal>
 \fi
@@ -26,8 +29,9 @@ The initial idea of this package came from a question and answer on the site htt
 \askforoverwritefalse
 \preamble
 ----------------------------------------------------------------
-braids --- a style file for drawing braid diagrams with TikZ/PGF
-E-mail: loopspace@mathforge.org
+braids --- a TikZ library for drawing braid diagrams
+bundle version: v2.3 2024/01/09
+E-mail: Andrew Stacey <loopspace@mathforge.org>
 Released under the LaTeX Project Public License v1.3c or later
 See http://www.latex-project.org/lppl.txt
 ----------------------------------------------------------------
@@ -82,16 +86,12 @@ and the derived files            README.txt,
   \expandafter\endgroup
 \fi
 %</internal>
-%<*package>
-\NeedsTeXFormat{LaTeX2e}
-\ProvidesPackage{braids}[2011/10/18 v1.1 Tikz/PGF commands for drawing braid diagrams]
-%</package>
 %<*driver>
 \documentclass{l3doc}
 \usepackage[T1]{fontenc}
 \usepackage{lmodern}
 \usepackage{tikz}
-\usepackage{braids}
+\usepackage[nowarning]{braids}
 \usetikzlibrary{braids}
                                  
 \EnableCrossrefs
@@ -103,7 +103,7 @@ and the derived files            README.txt,
 %</driver>
 % \fi
 %
-% \CheckSum{2399}
+% \CheckSum{2401}
 %
 % \CharacterTable
 %  {Upper-case    \A\B\C\D\E\F\G\H\I\J\K\L\M\N\O\P\Q\R\S\T\U\V\W\X\Y\Z
@@ -163,6 +163,8 @@ and the derived files            README.txt,
 %
 % Issue a notice that this is a depreciated version of the braids package.
 %    \begin{macrocode}
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{braids}[2011/10/18 v1.1 Tikz/PGF commands for drawing braid diagrams (depreciated package)]
 \newif\if@braids@warning@
 \@braids@warning@true
 \DeclareOption{nowarning}{%
@@ -173,7 +175,7 @@ and the derived files            README.txt,
 
 \if@braids@warning@
 \PackageWarning{braids}{%
-  This package has been reimplemented as a TikZ library; if starting with a fresh document, please consider using that instead.%
+  This package is frozen at v1.1 from 2011/10/18 and has been reimplemented as a TikZ library; if starting with a fresh document, please consider using that instead.%
 }%
 \fi
 %    \end{macrocode}
